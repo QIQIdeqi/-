@@ -72,8 +72,15 @@ namespace GeometryWarrior
         {
             if (hasExploded) return;
             
-            // Check if hit enemy or obstacle
-            if (other.GetComponent<EnemyBase>() != null || other.CompareTag("Obstacle"))
+            // Check if hit enemy
+            if (other.GetComponent<EnemyBase>() != null)
+            {
+                Explode();
+            }
+            // Check for obstacle (avoid CompareTag to prevent errors if tag not defined)
+            else if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle") || 
+                     other.name.Contains("Obstacle") || 
+                     other.name.Contains("Wall"))
             {
                 Explode();
             }

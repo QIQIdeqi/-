@@ -265,5 +265,44 @@ namespace GeometryWarrior
             currentHealth = Mathf.Min(currentHealth, maxHealth);
             OnHealthChanged?.Invoke(currentHealth);
         }
+        
+        /// <summary>
+        /// Increase max health and heal for the same amount
+        /// </summary>
+        public void IncreaseMaxHealth(int amount)
+        {
+            maxHealth += amount;
+            currentHealth += amount; // Also heal the new amount
+            OnHealthChanged?.Invoke(currentHealth);
+            Debug.Log($"PlayerController: Max health increased by {amount}, now {maxHealth}/{currentHealth}");
+        }
+        
+        /// <summary>
+        /// Increase move speed
+        /// </summary>
+        public void IncreaseMoveSpeed(float amount)
+        {
+            moveSpeed += amount;
+            Debug.Log($"PlayerController: Move speed increased by {amount}, now {moveSpeed}");
+        }
+        
+        /// <summary>
+        /// Increase attack speed (reduce cooldown)
+        /// </summary>
+        public void IncreaseAttackSpeed(float amount)
+        {
+            attackCooldown = Mathf.Max(0.1f, attackCooldown - amount);
+            Debug.Log($"PlayerController: Attack cooldown reduced by {amount}, now {attackCooldown}");
+        }
+        
+        /// <summary>
+        /// Increase pickup range (for exp orbs)
+        /// </summary>
+        public void IncreasePickupRange(float amount)
+        {
+            // This would need to be implemented in the pickup logic
+            // For now, just log it
+            Debug.Log($"PlayerController: Pickup range increased by {amount}");
+        }
     }
 }

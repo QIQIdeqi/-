@@ -51,7 +51,21 @@ namespace GeometryWarrior
         
         private void Start()
         {
+            // Try to get WeaponManager
             weaponManager = WeaponManager.Instance;
+            if (weaponManager == null)
+            {
+                weaponManager = FindObjectOfType<WeaponManager>();
+            }
+            
+            if (weaponManager != null)
+            {
+                Debug.Log($"UpgradeManager: WeaponManager found - {weaponManager.name}");
+            }
+            else
+            {
+                Debug.LogError("UpgradeManager: WeaponManager not found in scene! Please add a GameObject with WeaponManager script.");
+            }
             
             // Subscribe to GameManager's player spawn event
             if (GameManager.Instance != null)
@@ -181,22 +195,25 @@ namespace GeometryWarrior
         {
             if (upgrade == null) return false;
             
+            // Get WeaponManager instance directly
+            WeaponManager wm = weaponManager ?? WeaponManager.Instance;
+            
             switch (upgrade.type)
             {
                 case UpgradeType.NewWeapon:
                     // Only show if player doesn't have this weapon
-                    if (weaponManager != null && !string.IsNullOrEmpty(upgrade.weaponTypeName))
+                    if (wm != null && !string.IsNullOrEmpty(upgrade.weaponTypeName))
                     {
-                        bool hasWeapon = weaponManager.HasWeaponByTypeName(upgrade.weaponTypeName);
+                        bool hasWeapon = wm.HasWeaponByTypeName(upgrade.weaponTypeName);
                         return !hasWeapon;
                     }
                     return true;
                     
                 case UpgradeType.UpgradeWeapon:
                     // Only show if player has this weapon and it's not max level
-                    if (weaponManager != null && !string.IsNullOrEmpty(upgrade.weaponTypeName))
+                    if (wm != null && !string.IsNullOrEmpty(upgrade.weaponTypeName))
                     {
-                        WeaponBase weapon = weaponManager.GetWeaponByTypeName(upgrade.weaponTypeName);
+                        WeaponBase weapon = wm.GetWeaponByTypeName(upgrade.weaponTypeName);
                         return weapon != null && weapon.Level < weapon.MaxLevel;
                     }
                     return false;
@@ -235,20 +252,38 @@ namespace GeometryWarrior
         /// </summary>
         private void ApplyUpgrade(UpgradeData upgrade)
         {
+            Debug.Log($"ApplyUpgrade: Type={upgrade.type}, Name={upgrade.upgradeName}, WeaponTypeName={upgrade.weaponTypeName}");
+            
+            // Get WeaponManager instance directly (may not be cached yet)
+            WeaponManager wm = weaponManager ?? WeaponManager.Instance;
+            
+            // If still null, try to find in scene
+            if (wm == null)
+            {
+                wm = FindObjectOfType<WeaponManager>();
+                Debug.Log($"ApplyUpgrade: FindObjectOfType<WeaponManager> returned {wm}");
+            }
+            
             switch (upgrade.type)
             {
                 case UpgradeType.NewWeapon:
-                    if (weaponManager != null)
+                    if (wm != null)
                     {
-                        weaponManager.AddWeaponByTypeName(upgrade.weaponTypeName);
-                        Debug.Log($"Added new weapon: {upgrade.weaponTypeName}");
+                        Debug.Log($"ApplyUpgrade: Calling AddWeaponByTypeName with '{upgrade.weaponTypeName}'");
+                        bool success = wm.AddWeaponByTypeName(upgrade.weaponTypeName);
+                        Debug.Log($"ApplyUpgrade: AddWeaponByTypeName returned {success}");
+                    }
+                    else
+                    {
+                        Debug.LogError("ApplyUpgrade: WeaponManager is null! Make sure WeaponManager exists in the scene.");
                     }
                     break;
                     
                 case UpgradeType.UpgradeWeapon:
-                    if (weaponManager != null)
+                    WeaponManager wm2 = weaponManager ?? WeaponManager.Instance;
+                    if (wm2 != null)
                     {
-                        weaponManager.UpgradeWeapon(upgrade.weaponTypeName);
+                        wm2.UpgradeWeapon(upgrade.weaponTypeName);
                         Debug.Log($"Upgraded weapon: {upgrade.weaponTypeName}");
                     }
                     break;
@@ -264,24 +299,32 @@ namespace GeometryWarrior
         /// </summary>
         private void ApplyStatBoost(UpgradeData upgrade)
         {
-            if (player == null) return;
+            PlayerController p = player ?? FindObjectOfType<PlayerController>();
+            if (p == null)
+            {
+                Debug.LogError("ApplyStatBoost: Player is null!");
+                return;
+            }
             
             switch (upgrade.statType)
             {
                 case StatBoostType.MaxHealth:
-                    // Note: Would need to add max health modification to PlayerController
+                    p.IncreaseMaxHealth(Mathf.RoundToInt(upgrade.statValue));
                     Debug.Log($"Max Health boosted by {upgrade.statValue}");
                     break;
                     
                 case StatBoostType.MoveSpeed:
+                    p.IncreaseMoveSpeed(upgrade.statValue);
                     Debug.Log($"Move Speed boosted by {upgrade.statValue}");
                     break;
                     
                 case StatBoostType.AttackSpeed:
+                    p.IncreaseAttackSpeed(upgrade.statValue);
                     Debug.Log($"Attack Speed boosted by {upgrade.statValue}");
                     break;
                     
                 case StatBoostType.PickupRange:
+                    p.IncreasePickupRange(upgrade.statValue);
                     Debug.Log($"Pickup Range boosted by {upgrade.statValue}");
                     break;
             }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u6FC0\u5149\u6B66\u5668"
   m_EditorClassIdentifier: 
   upgradeName: " \u6FC0\u5149\u53D1\u5C04\u5668"
-  description: Fires penetrating laser beams
+  description: "\u53D1\u5C04\u7A7F\u900F\u6027\u6FC0\u5149\u675F\uFF0C\u53EF\u8D2F\u7A7F\u591A\u4E2A\u654C\u4EBA"
   icon: {fileID: 0}
   type: 0
   weaponTypeName: LaserWeapon

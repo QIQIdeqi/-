@@ -25,19 +25,44 @@ namespace GeometryWarrior
             if (Instance == null)
             {
                 Instance = this;
+                Debug.Log("WeaponManager: Instance set successfully");
             }
             else
             {
+                Debug.LogWarning("WeaponManager: Another instance exists, destroying this one");
                 Destroy(gameObject);
             }
         }
         
         private void Start()
         {
-            PlayerController player = FindObjectOfType<PlayerController>();
+            // Subscribe to player spawn event
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnPlayerSpawned += OnPlayerSpawned;
+                
+                // If player already exists
+                if (GameManager.Instance.Player != null)
+                {
+                    OnPlayerSpawned(GameManager.Instance.Player);
+                }
+            }
+        }
+        
+        private void OnPlayerSpawned(PlayerController player)
+        {
             if (player != null)
             {
                 playerTransform = player.transform;
+                Debug.Log($"WeaponManager: Player transform set to {playerTransform.name}");
+            }
+        }
+        
+        private void OnDestroy()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnPlayerSpawned -= OnPlayerSpawned;
             }
         }
         
@@ -46,32 +71,45 @@ namespace GeometryWarrior
         /// </summary>
         public bool AddWeaponFromPrefab(GameObject prefab)
         {
-            if (prefab == null) return false;
+            if (prefab == null)
+            {
+                Debug.LogError("WeaponManager: Prefab is null!");
+                return false;
+            }
             
             // Check if already has this weapon type
             WeaponBase prefabWeapon = prefab.GetComponent<WeaponBase>();
             if (prefabWeapon != null && HasWeaponByTypeName(prefabWeapon.GetType().Name))
             {
+                Debug.Log($"WeaponManager: Already has weapon {prefabWeapon.GetType().Name}");
                 return false;
             }
             
             // Instantiate weapon
             GameObject weaponObj = Instantiate(prefab);
             weaponObj.name = prefab.name;
+            Debug.Log($"WeaponManager: Instantiated {weaponObj.name}");
             
             // Set parent after instantiation (fixes persistent error)
             if (playerTransform != null)
             {
                 weaponObj.transform.SetParent(playerTransform, false);
+                Debug.Log($"WeaponManager: Set parent to {playerTransform.name}");
+            }
+            else
+            {
+                Debug.LogWarning("WeaponManager: Player transform is null, weapon will not follow player!");
             }
             
             WeaponBase weapon = weaponObj.GetComponent<WeaponBase>();
             if (weapon != null)
             {
                 activeWeapons.Add(weapon);
+                Debug.Log($"WeaponManager: Added {weapon.GetType().Name} to active weapons. Total: {activeWeapons.Count}");
                 return true;
             }
             
+            Debug.LogError("WeaponManager: WeaponBase component not found on prefab!");
             Destroy(weaponObj);
             return false;
         }
@@ -81,6 +119,8 @@ namespace GeometryWarrior
         /// </summary>
         public bool AddWeaponByTypeName(string typeName)
         {
+            Debug.Log($"WeaponManager: Trying to add weapon by type name: {typeName}");
+            
             foreach (GameObject prefab in weaponPrefabObjects)
             {
                 if (prefab == null) continue;
@@ -88,9 +128,12 @@ namespace GeometryWarrior
                 WeaponBase weaponBase = prefab.GetComponent<WeaponBase>();
                 if (weaponBase != null && weaponBase.GetType().Name == typeName)
                 {
+                    Debug.Log($"WeaponManager: Found prefab for {typeName}");
                     return AddWeaponFromPrefab(prefab);
                 }
             }
+            
+            Debug.LogError($"WeaponManager: No prefab found for weapon type: {typeName}");
             return false;
         }
         
