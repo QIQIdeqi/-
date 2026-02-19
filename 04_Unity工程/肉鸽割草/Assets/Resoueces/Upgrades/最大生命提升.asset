@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a00a6bd36c3bab469714761e8109a76, type: 3}
+  m_Name: "\u6700\u5927\u751F\u547D\u63D0\u5347"
+  m_EditorClassIdentifier: 
+  upgradeName: "\u6700\u5927\u751F\u547D\u63D0\u5347"
+  description: "\u589E\u52A0\u6700\u5927\u751F\u547D\u503C"
+  icon: {fileID: 0}
+  type: 2
+  weaponTypeName: 
+  statType: 0
+  statValue: 20
+  minLevel: 1
+  maxLevel: 5

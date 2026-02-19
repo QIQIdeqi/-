@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a00a6bd36c3bab469714761e8109a76, type: 3}
+  m_Name: "\u6FC0\u5149\u5F3A\u5316"
+  m_EditorClassIdentifier: 
+  upgradeName: "\u6FC0\u5149\u5F3A\u5316"
+  description: "\u589E\u52A0\u6FC0\u5149\u4F24\u5BB3\u548C\u5C04\u7A0B"
+  icon: {fileID: 0}
+  type: 1
+  weaponTypeName: LaserWeapon
+  statType: 0
+  statValue: 0
+  minLevel: 1
+  maxLevel: 5
