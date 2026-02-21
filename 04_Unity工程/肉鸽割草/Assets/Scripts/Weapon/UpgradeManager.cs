@@ -162,27 +162,50 @@ namespace GeometryWarrior
         }
         
         /// <summary>
-        /// Get random available upgrades
+        /// Get random available upgrades, always return exactly 'count' options
         /// </summary>
         private List<UpgradeData> GetRandomAvailableUpgrades(int count)
         {
             List<UpgradeData> available = new List<UpgradeData>();
+            List<UpgradeData> statBoostUpgrades = new List<UpgradeData>(); // 属性加成作为后备
             
             foreach (UpgradeData upgrade in allUpgrades)
             {
-                if (IsUpgradeAvailable(upgrade))
+                if (upgrade.type == UpgradeType.StatBoost)
+                {
+                    statBoostUpgrades.Add(upgrade);
+                }
+                else if (IsUpgradeAvailable(upgrade))
                 {
                     available.Add(upgrade);
                 }
             }
             
-            // Shuffle and take count
+            // Shuffle both lists
             ShuffleList(available);
+            ShuffleList(statBoostUpgrades);
             
             List<UpgradeData> result = new List<UpgradeData>();
-            for (int i = 0; i < Mathf.Min(count, available.Count); i++)
+            
+            // 首先添加可用的武器升级
+            int weaponCount = Mathf.Min(count, available.Count);
+            for (int i = 0; i < weaponCount; i++)
             {
                 result.Add(available[i]);
+            }
+            
+            // 如果不够，用属性加成填满
+            int remaining = count - result.Count;
+            for (int i = 0; i < remaining && i < statBoostUpgrades.Count; i++)
+            {
+                result.Add(statBoostUpgrades[i]);
+            }
+            
+            // 如果还不够，随机重复添加属性加成
+            while (result.Count < count && statBoostUpgrades.Count > 0)
+            {
+                int randomIndex = Random.Range(0, statBoostUpgrades.Count);
+                result.Add(statBoostUpgrades[randomIndex]);
             }
             
             return result;

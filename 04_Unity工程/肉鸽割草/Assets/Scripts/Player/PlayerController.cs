@@ -27,8 +27,13 @@ namespace GeometryWarrior
         [SerializeField] private int expToNextLevel = 100;
         
         [Header("[Visuals]")]
-        [SerializeField] private Color normalColor = Color.cyan;
-        [SerializeField] private Color damageFlashColor = Color.white;
+        [SerializeField] private bool useCustomColor = false;  // 是否使用自定义颜色覆盖Sprite
+        [SerializeField] private Color normalColor = Color.white;
+        [SerializeField] private Color damageFlashColor = Color.white;  // 受击闪白，不透明
+        
+        [Header("[Movement Bounds]")]
+        [SerializeField] private bool useMovementBounds = true;
+        private Bounds movementBounds;
         
         private Rigidbody2D rb;
         private SpriteRenderer spriteRenderer;
@@ -59,7 +64,7 @@ namespace GeometryWarrior
                 rb.freezeRotation = true;
             }
             
-            if (spriteRenderer != null)
+            if (spriteRenderer != null && useCustomColor)
             {
                 spriteRenderer.color = normalColor;
             }
@@ -98,6 +103,45 @@ namespace GeometryWarrior
             
             // Move player
             rb.velocity = moveInput * moveSpeed;
+            
+            // 限制在边界内
+            if (useMovementBounds && movementBounds.size != Vector3.zero)
+            {
+                ClampPositionToBounds();
+            }
+        }
+        
+        /// <summary>
+        /// 将Player位置限制在边界内
+        /// </summary>
+        private void ClampPositionToBounds()
+        {
+            Vector3 pos = transform.position;
+            
+            // 获取Sprite的半尺寸（如果有）
+            float halfWidth = 0.3f;  // 默认半宽
+            float halfHeight = 0.3f; // 默认半高
+            if (spriteRenderer != null && spriteRenderer.sprite != null)
+            {
+                halfWidth = spriteRenderer.sprite.bounds.extents.x * transform.localScale.x;
+                halfHeight = spriteRenderer.sprite.bounds.extents.y * transform.localScale.y;
+            }
+            
+            // 限制位置，考虑Player自身的尺寸
+            pos.x = Mathf.Clamp(pos.x, movementBounds.min.x + halfWidth, movementBounds.max.x - halfWidth);
+            pos.y = Mathf.Clamp(pos.y, movementBounds.min.y + halfHeight, movementBounds.max.y - halfHeight);
+            
+            transform.position = pos;
+        }
+        
+        /// <summary>
+        /// 设置移动边界（由GameManager调用）
+        /// </summary>
+        public void SetMovementBounds(Bounds bounds)
+        {
+            movementBounds = bounds;
+            useMovementBounds = true;
+            Debug.Log($"PlayerController: 移动边界已设置 - {bounds}");
         }
         
         private void HandleInput()
@@ -206,9 +250,10 @@ namespace GeometryWarrior
         {
             if (spriteRenderer == null) yield break;
             
+            Color originalColor = useCustomColor ? normalColor : spriteRenderer.color;
             spriteRenderer.color = damageFlashColor;
             yield return new WaitForSeconds(0.1f);
-            spriteRenderer.color = normalColor;
+            spriteRenderer.color = originalColor;
         }
         
         private void Die()

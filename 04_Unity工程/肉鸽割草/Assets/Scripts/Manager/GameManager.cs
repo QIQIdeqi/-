@@ -85,25 +85,86 @@ namespace GeometryWarrior
                 Destroy(Player.gameObject);
             }
             
+            // 先初始化TileManager（确定游戏区域）
+            InitializeTileManager();
+            
+            // 再生成Player（在Tile中心出生）
             SpawnPlayer();
             SetGameState(GameState.Playing);
             
             Debug.Log("Game Started!");
         }
         
+        /// <summary>
+        /// 初始化TileManager，设置游戏区域
+        /// </summary>
+        private void InitializeTileManager()
+        {
+            TileManager tileManager = FindObjectOfType<TileManager>();
+            if (tileManager != null)
+            {
+                // 如果有spawnPoint，让Tile中心对准spawnPoint
+                // 否则使用原点
+                Vector3 centerPos = spawnPoint != null ? spawnPoint.position : Vector3.zero;
+                tileManager.CenterOnPosition(centerPos);
+                Debug.Log($"GameManager: TileManager已初始化，中心在 {centerPos}");
+            }
+        }
+        
         private void SpawnPlayer()
         {
             if (playerPrefab != null)
             {
-                Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : Vector3.zero;
+                // 获取TileManager的中心点作为出生位置
+                Vector3 spawnPos = GetTileGridCenter();
+                Bounds bounds = GetTileGridBounds();
+                
                 GameObject playerObj = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
                 Player = playerObj.GetComponent<PlayerController>();
                 Player.OnDeath += OnPlayerDeath;
                 
+                // 设置Player的移动边界
+                Player.SetMovementBounds(bounds);
+                
+                // 设置EnemySpawner的生成边界
+                EnemySpawner spawner = FindObjectOfType<EnemySpawner>();
+                if (spawner != null)
+                {
+                    spawner.SetSpawnBounds(bounds);
+                }
+                
                 // Notify systems that player has spawned
                 OnPlayerSpawned?.Invoke(Player);
-                Debug.Log($"GameManager: Player spawned, notified {OnPlayerSpawned?.GetInvocationList().Length ?? 0} subscribers");
+                Debug.Log($"GameManager: Player出生在Tile中心 {spawnPos}, 边界: {bounds}");
             }
+        }
+        
+        /// <summary>
+        /// 获取Tile网格的中心点
+        /// </summary>
+        private Vector3 GetTileGridCenter()
+        {
+            TileManager tileManager = FindObjectOfType<TileManager>();
+            if (tileManager != null)
+            {
+                return tileManager.GridBounds.center;
+            }
+            // 如果没有TileManager，使用spawnPoint或原点
+            return spawnPoint != null ? spawnPoint.position : Vector3.zero;
+        }
+        
+        /// <summary>
+        /// 获取Tile网格的边界
+        /// </summary>
+        private Bounds GetTileGridBounds()
+        {
+            TileManager tileManager = FindObjectOfType<TileManager>();
+            if (tileManager != null)
+            {
+                return tileManager.GridBounds;
+            }
+            // 如果没有TileManager，返回无限边界
+            return new Bounds(Vector3.zero, Vector3.one * 1000f);
         }
         
         private void OnPlayerDeath()

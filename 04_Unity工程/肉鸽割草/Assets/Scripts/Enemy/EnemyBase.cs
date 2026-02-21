@@ -3,39 +3,56 @@ using UnityEngine;
 namespace GeometryWarrior
 {
     /// <summary>
-    /// EnemyBase - Base class for all enemies
+    /// EnemyBase - Base class for all enemies with scaling stats and health bar
     /// </summary>
     public class EnemyBase : MonoBehaviour
     {
         [Header("[Base Stats]")]
-        [SerializeField] protected int maxHealth = 30;
-        [SerializeField] protected int currentHealth;
-        [SerializeField] protected int attackDamage = 10;
-        [SerializeField] protected float moveSpeed = 2f;
-        [SerializeField] protected int expValue = 10;
+        [SerializeField] protected int baseMaxHealth = 30;
+        [SerializeField] protected int baseAttackDamage = 10;
+        [SerializeField] protected float baseMoveSpeed = 2f;
+        [SerializeField] protected int baseExpValue = 10;
+        
+        // 当前实际值（考虑难度加成）
+        protected int maxHealth;
+        protected int currentHealth;
+        protected int attackDamage;
+        protected float moveSpeed;
+        protected int expValue;
         
         [Header("[Drop Settings]")]
         [SerializeField] protected GameObject expOrbPrefab;
         
         [Header("[Visuals]")]
-        [SerializeField] protected Color normalColor = Color.red;
-        [SerializeField] protected Color damageFlashColor = new Color(1f, 1f, 1f, 0.5f);
+        [SerializeField] protected bool useCustomColor = false;
+        [SerializeField] protected Color normalColor = Color.white;
+        [SerializeField] protected Color damageFlashColor = Color.white;
         
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
         protected Transform player;
+        protected EnemyHealthBar healthBar;
         
         public bool IsDead { get; protected set; }
         public string EnemyTypeName { get; set; }
+        public int AttackDamage => attackDamage;
+        public int CurrentHealth => currentHealth;
+        public int MaxHealth => maxHealth;
         
         public System.Action<EnemyBase> OnDeathEvent;
+        public System.Action<float> OnHealthChanged; // 血量百分比变化事件
+        
+        // 难度等级（由EnemySpawner设置）
+        protected int difficultyLevel = 0;
+        protected float difficultyMultiplier = 1f;
         
         protected virtual void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            healthBar = GetComponentInChildren<EnemyHealthBar>();
             
-            if (spriteRenderer != null)
+            if (spriteRenderer != null && useCustomColor)
             {
                 spriteRenderer.color = normalColor;
             }
@@ -50,9 +67,13 @@ namespace GeometryWarrior
         protected virtual void OnEnable()
         {
             IsDead = false;
+            
+            // 应用难度加成后的属性
+            ApplyDifficultyStats();
+            
             currentHealth = maxHealth;
             
-            if (spriteRenderer != null)
+            if (spriteRenderer != null && useCustomColor)
             {
                 spriteRenderer.color = normalColor;
             }
@@ -62,6 +83,40 @@ namespace GeometryWarrior
                 PlayerController foundPlayer = FindObjectOfType<PlayerController>();
                 if (foundPlayer != null)
                     player = foundPlayer.transform;
+            }
+            
+            // 通知血条更新
+            NotifyHealthChanged();
+        }
+        
+        /// <summary>
+        /// 设置难度等级（由EnemySpawner在游戏开始时调用）
+        /// </summary>
+        public virtual void SetDifficultyLevel(int level, float multiplier)
+        {
+            difficultyLevel = level;
+            difficultyMultiplier = multiplier;
+            ApplyDifficultyStats();
+        }
+        
+        /// <summary>
+        /// 应用难度加成到属性
+        /// </summary>
+        protected virtual void ApplyDifficultyStats()
+        {
+            // 血量 = 基础 × 难度倍率
+            maxHealth = Mathf.RoundToInt(baseMaxHealth * difficultyMultiplier);
+            // 攻击 = 基础 × 难度倍率
+            attackDamage = Mathf.RoundToInt(baseAttackDamage * difficultyMultiplier);
+            // 移速轻微增加
+            moveSpeed = baseMoveSpeed * (1f + (difficultyMultiplier - 1f) * 0.3f);
+            // 经验值也增加
+            expValue = Mathf.RoundToInt(baseExpValue * (1f + (difficultyMultiplier - 1f) * 0.5f));
+            
+            // 同步当前血量
+            if (currentHealth > maxHealth || currentHealth == 0)
+            {
+                currentHealth = maxHealth;
             }
         }
         
@@ -95,6 +150,9 @@ namespace GeometryWarrior
             currentHealth -= damage;
             currentHealth = Mathf.Max(0, currentHealth);
             
+            // 通知血条更新
+            NotifyHealthChanged();
+            
             StartCoroutine(DamageFlash());
             
             if (currentHealth <= 0)
@@ -103,13 +161,23 @@ namespace GeometryWarrior
             }
         }
         
+        /// <summary>
+        /// 通知血量变化事件
+        /// </summary>
+        protected void NotifyHealthChanged()
+        {
+            float healthPercent = maxHealth > 0 ? (float)currentHealth / maxHealth : 0f;
+            OnHealthChanged?.Invoke(healthPercent);
+        }
+        
         protected System.Collections.IEnumerator DamageFlash()
         {
             if (spriteRenderer == null) yield break;
             
+            Color originalColor = useCustomColor ? normalColor : spriteRenderer.color;
             spriteRenderer.color = damageFlashColor;
             yield return new WaitForSeconds(0.05f);
-            spriteRenderer.color = normalColor;
+            spriteRenderer.color = originalColor;
         }
         
         protected virtual void Die()
