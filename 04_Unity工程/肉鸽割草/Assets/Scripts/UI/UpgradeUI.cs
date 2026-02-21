@@ -66,11 +66,21 @@ namespace GeometryWarrior
             // Clear previous options
             ClearOptions();
             
+            // Ensure game object is active before starting coroutines
+            gameObject.SetActive(true);
+            
             // Show panel
             upgradePanel.SetActive(true);
             
             // Fade in
-            StartCoroutine(FadeIn());
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(FadeIn());
+            }
+            else
+            {
+                canvasGroup.alpha = 1f;
+            }
             
             // Create option buttons
             for (int i = 0; i < upgrades.Count; i++)

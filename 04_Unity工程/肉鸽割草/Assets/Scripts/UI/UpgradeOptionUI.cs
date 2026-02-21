@@ -64,7 +64,20 @@ namespace GeometryWarrior
         
         public void SetDelay(float delay)
         {
-            StartCoroutine(AnimateIn(delay));
+            // Only start coroutine if game object is active
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(AnimateIn(delay));
+            }
+            else
+            {
+                // If inactive, just set final state
+                transform.localScale = Vector3.one;
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 1f;
+                }
+            }
         }
         
         private System.Collections.IEnumerator AnimateIn(float delay)

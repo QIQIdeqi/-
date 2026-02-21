@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 5605139581717877650}
   m_Layer: 6
   m_Name: Enemy_Triangle
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -263,6 +263,9 @@ MonoBehaviour:
   useCustomColor: 0
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  burningEffect: {fileID: 0}
+  frozenEffect: {fileID: 0}
+  slowEffect: {fileID: 0}
 --- !u!1 &4218848933610678273
 GameObject:
   m_ObjectHideFlags: 0
