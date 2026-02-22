@@ -183,6 +183,25 @@ namespace GeometryWarrior
             isVisualApplied = true;
         }
         
+        void SetTrailColor(Color color)
+        {
+            if (trailRenderer == null) return;
+            
+            // 创建渐变：从开始颜色到透明
+            Gradient gradient = new Gradient();
+            GradientColorKey[] colorKeys = new GradientColorKey[2];
+            GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+            
+            colorKeys[0] = new GradientColorKey(color, 0f);
+            colorKeys[1] = new GradientColorKey(color, 1f);
+            
+            alphaKeys[0] = new GradientAlphaKey(color.a, 0f);
+            alphaKeys[1] = new GradientAlphaKey(0f, 1f);
+            
+            gradient.SetKeys(colorKeys, alphaKeys);
+            trailRenderer.colorGradient = gradient;
+        }
+        
         #endregion
         
         private void OnTriggerEnter2D(Collider2D other)

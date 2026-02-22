@@ -3231,13 +3231,13 @@ MonoBehaviour:
   fireColor: {r: 1, g: 0.27, b: 0.27, a: 1}
   iceColor: {r: 0, g: 0.53, b: 1, a: 1}
   electricColor: {r: 0.53, g: 0.27, b: 1, a: 1}
-  trailTime: 0.15
+  trailTime: 0.5
   trailWidthCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
