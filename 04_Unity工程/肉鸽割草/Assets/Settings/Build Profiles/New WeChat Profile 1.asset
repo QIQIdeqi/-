@@ -77,7 +77,7 @@ MonoBehaviour:
           fbslim: 0
           DeleteStreamingAssets: 1
           ProfilingMemory: 0
-          CleanBuild: 1
+          CleanBuild: 0
           CustomNodePath: 
           autoAdaptScreen: 1
           showMonitorSuggestModal: 1
