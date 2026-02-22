@@ -9,6 +9,7 @@ namespace GeometryWarrior
     {
         [Header("[Movement]")]
         [SerializeField] private float moveSpeed = 5f;
+        public Joystick joystick;  // 虚拟摇杆引用（public 方便拖拽）
         
         [Header("[Health]")]
         [SerializeField] private int maxHealth = 100;
@@ -73,6 +74,12 @@ namespace GeometryWarrior
         private void Start()
         {
             currentHealth = maxHealth;
+            
+            // 如果没有手动指定摇杆，自动查找
+            if (joystick == null)
+            {
+                joystick = FindObjectOfType<Joystick>();
+            }
         }
         
         private void Update()
@@ -146,29 +153,37 @@ namespace GeometryWarrior
         
         private void HandleInput()
         {
-            // Keyboard input
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            float vertical = Input.GetAxisRaw("Vertical");
-            
-            // Mouse click to move (for mobile/touch)
-            if (Input.GetMouseButton(0))
+            // 优先使用虚拟摇杆输入
+            if (joystick != null && joystick.IsDragging)
             {
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                mousePos.z = 0;
-                Vector2 direction = (mousePos - transform.position).normalized;
-                
-                if (Vector2.Distance(mousePos, transform.position) > 0.5f)
-                {
-                    moveInput = direction;
-                }
-                else
-                {
-                    moveInput = Vector2.zero;
-                }
+                moveInput = joystick.GetDirection();
             }
             else
             {
-                moveInput = new Vector2(horizontal, vertical).normalized;
+                // Keyboard input
+                float horizontal = Input.GetAxisRaw("Horizontal");
+                float vertical = Input.GetAxisRaw("Vertical");
+                
+                // Mouse click to move (for mobile/touch)
+                if (Input.GetMouseButton(0))
+                {
+                    Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    mousePos.z = 0;
+                    Vector2 direction = (mousePos - transform.position).normalized;
+                    
+                    if (Vector2.Distance(mousePos, transform.position) > 0.5f)
+                    {
+                        moveInput = direction;
+                    }
+                    else
+                    {
+                        moveInput = Vector2.zero;
+                    }
+                }
+                else
+                {
+                    moveInput = new Vector2(horizontal, vertical).normalized;
+                }
             }
             
             // Flip sprite based on movement

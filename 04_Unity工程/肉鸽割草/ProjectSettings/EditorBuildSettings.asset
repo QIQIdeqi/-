@@ -4,8 +4,14 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
-  m_BuildProfiles: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/GameScene.unity
+    guid: a013fffd1b9583840a89eddc21382eeb
+  m_BuildProfiles:
+  - enabled: 1
+    path: Assets/Settings/Build Profiles/New WeChat Profile 1.asset
+    guid: 337f2b10682cdec46b3abc9310227566
   m_configObjects: {}
   m_SlimFeaturesWeixinMiniGame:
     AllocateOverhead: 1
