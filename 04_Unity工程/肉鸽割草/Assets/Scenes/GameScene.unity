@@ -1,15 +1,17 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!29 &1
 OcclusionCullingSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_OcclusionBakeSettings:
-    smallestOccluder: 5
-    smallestHole: 0.25
-    backfaceThreshold: 100
-  m_SceneGUID: 00000000000000000000000000000000
+  serializedVersion: 3
   m_OcclusionCullingData: {fileID: 0}
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionEnabled: 0
+  m_DisplayOccluded: 0
+  m_SceneDepthBufferWidth: 512
+  m_SceneDepthBufferHeight: 512
+  m_ShadowDepthBufferWidth: 512
+  m_ShadowDepthBufferHeight: 512
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
@@ -71,7 +73,7 @@ LightmapSettings:
     m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
-    m_BakeBackend: 1
+    m_BakeBackend: 2
     m_PVRSampling: 1
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 512
@@ -128,13 +130,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 165296777}
   - component: {fileID: 165296780}
   - component: {fileID: 165296779}
   - component: {fileID: 165296778}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: MainMenuPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -225,12 +228,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 185732155}
   - component: {fileID: 185732157}
   - component: {fileID: 185732156}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u80FD\u91CF\u5E01\u6587\u672C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -277,6 +281,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u80FD\u91CF\u5E01 +0"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -359,10 +364,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 228595217}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -395,12 +401,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 245559737}
   - component: {fileID: 245559739}
   - component: {fileID: 245559738}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: UpgradePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -471,10 +478,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 264240478}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -507,12 +515,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 277576329}
   - component: {fileID: 277576331}
   - component: {fileID: 277576330}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -582,12 +591,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 300201172}
   - component: {fileID: 300201174}
   - component: {fileID: 300201173}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -634,6 +644,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u5F00\u59CB\u6E38\u620F"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -716,11 +727,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 332041751}
   - component: {fileID: 332041750}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: UpgradeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -770,13 +782,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 389701856}
   - component: {fileID: 389701859}
   - component: {fileID: 389701858}
   - component: {fileID: 389701857}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u5F00\u59CB\u6E38\u620F\u6309\u94AE"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -891,13 +904,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 613419849}
   - component: {fileID: 613419852}
   - component: {fileID: 613419851}
   - component: {fileID: 613419850}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u8FD4\u56DE\u83DC\u5355"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1012,7 +1026,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 659810042}
   - component: {fileID: 659810045}
@@ -1020,6 +1034,7 @@ GameObject:
   - component: {fileID: 659810043}
   - component: {fileID: 659810041}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: UpgradeCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1132,12 +1147,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 674014351}
   - component: {fileID: 674014353}
   - component: {fileID: 674014352}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u65F6\u95F4"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1184,6 +1200,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u5B58\u6D3B: 00:00"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -1266,11 +1283,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 716088422}
   - component: {fileID: 716088423}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u7ECF\u9A8C\u6761"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1355,12 +1373,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 767176672}
   - component: {fileID: 767176674}
   - component: {fileID: 767176673}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u7B49\u7EA7\u6587\u672C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1407,6 +1426,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: Lv.1
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -1489,11 +1509,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 834941206}
   - component: {fileID: 834941207}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: HUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1549,12 +1570,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1034699715}
   - component: {fileID: 1034699717}
   - component: {fileID: 1034699716}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u6807\u9898"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1601,6 +1623,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u51E0\u4F55\u6218\u58EB"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -1683,12 +1706,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1060393042}
   - component: {fileID: 1060393044}
   - component: {fileID: 1060393043}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u65F6\u95F4\u6587\u672C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1735,6 +1759,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: 00:00
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -1817,12 +1842,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1112745949}
   - component: {fileID: 1112745951}
   - component: {fileID: 1112745950}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u5206\u6570\u6587\u672C "
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1869,6 +1895,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u5206\u6570: 0"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -1951,12 +1978,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1168587900}
   - component: {fileID: 1168587902}
   - component: {fileID: 1168587901}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2003,6 +2031,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u590D\u6D3B\uFF08\u770B\u5E7F\u544A\uFF09"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -2085,12 +2114,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1215622754}
   - component: {fileID: 1215622753}
   - component: {fileID: 1215622752}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: EventSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2153,12 +2183,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1349381444}
   - component: {fileID: 1349381446}
   - component: {fileID: 1349381445}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2228,11 +2259,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1408024160}
   - component: {fileID: 1408024159}
   m_Layer: 8
+  m_HasEditorInfo: 1
   m_Name: TileManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2278,12 +2310,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1415044316}
   - component: {fileID: 1415044318}
   - component: {fileID: 1415044317}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2330,6 +2363,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u91CD\u65B0\u5F00\u59CB"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -2412,12 +2446,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1418985749}
   - component: {fileID: 1418985751}
   - component: {fileID: 1418985750}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u5206\u6570"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2464,6 +2499,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u5206\u6570: 0"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -2546,13 +2582,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1446945891}
   - component: {fileID: 1446945894}
   - component: {fileID: 1446945893}
   - component: {fileID: 1446945892}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u91CD\u65B0\u5F00\u59CB"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2667,12 +2704,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1452715456}
   - component: {fileID: 1452715458}
   - component: {fileID: 1452715457}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2742,13 +2780,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1632216525}
   - component: {fileID: 1632216528}
   - component: {fileID: 1632216527}
   - component: {fileID: 1632216526}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u590D\u6D3B\uFF08\u770B\u5E7F\u544A\uFF09"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2863,12 +2902,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1639629955}
   - component: {fileID: 1639629957}
   - component: {fileID: 1639629956}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u8840\u91CF\u6587\u672C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2915,6 +2955,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: 100/100
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -2997,13 +3038,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1672943971}
   - component: {fileID: 1672943974}
   - component: {fileID: 1672943973}
   - component: {fileID: 1672943972}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: GameOverPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3100,11 +3142,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1688282055}
   - component: {fileID: 1688282054}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3153,11 +3196,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1714543324}
   - component: {fileID: 1714543323}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: ProjectileVisualManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3179,11 +3223,11 @@ MonoBehaviour:
   fireMaterial: {fileID: 0}
   iceMaterial: {fileID: 0}
   electricMaterial: {fileID: 0}
-  defaultMaterial: {fileID: 0}
+  defaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   fireShape: {fileID: 0}
   iceShape: {fileID: 0}
   electricShape: {fileID: 0}
-  defaultShape: {fileID: 0}
+  defaultShape: {fileID: 21300000, guid: 23de0f2cd7f67724f89081a882135309, type: 3}
   fireColor: {r: 1, g: 0.27, b: 0.27, a: 1}
   iceColor: {r: 0, g: 0.53, b: 1, a: 1}
   electricColor: {r: 0.53, g: 0.27, b: 1, a: 1}
@@ -3233,11 +3277,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1732558105}
   - component: {fileID: 1732558106}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u8840\u6761"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3322,12 +3367,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1814515252}
   - component: {fileID: 1814515254}
   - component: {fileID: 1814515253}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3397,11 +3443,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1864362884}
   - component: {fileID: 1864362883}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: EnemySpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3454,12 +3501,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1875733466}
   - component: {fileID: 1875733468}
   - component: {fileID: 1875733467}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u6700\u9AD8\u5206\u6587\u672C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3506,6 +3554,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u6700\u9AD8\u5206: 0"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -3588,13 +3637,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1894366400}
   - component: {fileID: 1894366399}
   - component: {fileID: 1894366398}
   - component: {fileID: 1894366397}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: MainCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3693,13 +3743,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1947908513}
   - component: {fileID: 1947908512}
   - component: {fileID: 1947908511}
   - component: {fileID: 1947908514}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -3760,6 +3811,8 @@ Camera:
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1
+  m_enableGDRP: 1
+  m_backfaceCulling: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
@@ -3801,12 +3854,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1984739543}
   - component: {fileID: 1984739545}
   - component: {fileID: 1984739544}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3853,6 +3907,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u8FD4\u56DE\u83DC\u5355"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -3935,12 +3990,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 2019539344}
   - component: {fileID: 2019539346}
   - component: {fileID: 2019539345}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: "\u6807\u9898"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3987,6 +4043,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u6E38\u620F\u7ED3\u675F"
+  m_enableAdvanceTextProcess: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
   m_sharedMaterial: {fileID: 6184145801236676945, guid: 45d88e50e81130a47a1bd8f1b7e07377, type: 2}
@@ -4069,11 +4126,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 2043816635}
   - component: {fileID: 2043816634}
   m_Layer: 0
+  m_HasEditorInfo: 1
   m_Name: WeaponManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4117,11 +4175,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 2056937806}
   - component: {fileID: 2056937807}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: OptionsContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
