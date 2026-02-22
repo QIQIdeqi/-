@@ -174,18 +174,37 @@ namespace GeometryWarrior
         {
             energyCoins += Mathf.RoundToInt(score / 100f);
             SetGameState(GameState.GameOver);
+            
+            // 显示死亡面板
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.Show(GameOverPanel.PanelMode.GameOver);
+            }
+            
             Debug.Log($"Game Over! Survived: {gameTime:F1}s, Score: {score}, Energy Coins: {energyCoins}");
         }
         
+        /// <summary>
+        /// 暂停游戏（显示暂停面板）
+        /// </summary>
         public void PauseGame()
         {
             if (currentState == GameState.Playing)
             {
                 SetGameState(GameState.Paused);
                 Time.timeScale = 0f;
+                
+                // 显示暂停面板（使用 GameOverPanel 的暂停模式）
+                if (gameOverPanel != null)
+                {
+                    gameOverPanel.Show(GameOverPanel.PanelMode.Paused);
+                }
             }
         }
         
+        /// <summary>
+        /// 恢复游戏
+        /// </summary>
         public void ResumeGame()
         {
             if (currentState == GameState.Paused)
@@ -260,10 +279,12 @@ namespace GeometryWarrior
             
             if (gameOverPanel != null)
             {
-                if (currentState == GameState.GameOver)
-                    gameOverPanel.Show();
-                else
+                // GameOver 和 Paused 状态的面板显示由各自的方法控制
+                // 这里只处理其他状态的面板隐藏
+                if (currentState != GameState.GameOver && currentState != GameState.Paused)
+                {
                     gameOverPanel.Hide();
+                }
             }
         }
         
