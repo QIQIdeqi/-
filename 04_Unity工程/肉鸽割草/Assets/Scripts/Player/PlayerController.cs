@@ -80,6 +80,73 @@ namespace GeometryWarrior
             {
                 joystick = FindObjectOfType<Joystick>();
             }
+            
+            // 应用当前皮肤
+            ApplyCurrentSkin();
+        }
+        
+        /// <summary>
+        /// 应用当前皮肤
+        /// </summary>
+        private void ApplyCurrentSkin()
+        {
+            if (SkinManager.Instance != null)
+            {
+                ApplySkin(SkinManager.Instance.GetCurrentSkin());
+            }
+        }
+        
+        /// <summary>
+        /// 应用皮肤
+        /// </summary>
+        public void ApplySkin(SkinData skin)
+        {
+            if (skin == null || spriteRenderer == null) return;
+            
+            // 更换精灵
+            if (skin.playerSprite != null)
+            {
+                spriteRenderer.sprite = skin.playerSprite;
+            }
+            
+            // 应用染色
+            spriteRenderer.color = skin.tintColor;
+            
+            // 应用自定义材质（Shader）
+            if (skin.customMaterial != null)
+            {
+                spriteRenderer.material = skin.customMaterial;
+            }
+            else
+            {
+                spriteRenderer.material = null; // 恢复默认材质
+            }
+            
+            // TODO: 应用特效（拖尾、发光等）
+            ApplySkinEffects(skin);
+            
+            Debug.Log($"[PlayerController] 应用皮肤: {skin.skinName}");
+        }
+        
+        /// <summary>
+        /// 应用皮肤特效
+        /// </summary>
+        private void ApplySkinEffects(SkinData skin)
+        {
+            // 拖尾特效
+            TrailRenderer trail = GetComponent<TrailRenderer>();
+            if (trail != null)
+            {
+                trail.enabled = skin.hasTrailEffect;
+                if (skin.hasTrailEffect)
+                {
+                    trail.startColor = skin.trailColor;
+                    trail.endColor = new Color(skin.trailColor.r, skin.trailColor.g, skin.trailColor.b, 0f);
+                }
+            }
+            
+            // 发光特效 - 通过调整材质或添加光源实现
+            // 这里简单处理，实际项目中可能需要更复杂的Shader
         }
         
         private void Update()

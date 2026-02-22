@@ -23,6 +23,11 @@ namespace GeometryWarrior
         
         private void Awake()
         {
+            // 在 Start 中获取 GameManager，避免执行顺序问题
+        }
+        
+        private void Start()
+        {
             gameManager = GameManager.Instance;
             
             if (startGameButton != null)
@@ -58,11 +63,22 @@ namespace GeometryWarrior
         
         private void OnStartGameClicked()
         {
+            Debug.Log("[MainMenuPanel] Start Game clicked!");
             Hide();
             
             if (gameManager != null)
             {
+                Debug.Log("[MainMenuPanel] Calling gameManager.StartGame()");
                 gameManager.StartGame();
+            }
+            else
+            {
+                Debug.LogError("[MainMenuPanel] gameManager is null! Trying to find...");
+                gameManager = GameManager.Instance;
+                if (gameManager != null)
+                {
+                    gameManager.StartGame();
+                }
             }
         }
         

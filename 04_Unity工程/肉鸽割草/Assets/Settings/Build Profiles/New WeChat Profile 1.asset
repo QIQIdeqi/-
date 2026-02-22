@@ -33,7 +33,7 @@ MonoBehaviour:
           rid: 736094952292352012
         ProjectConf:
           projectName: 
-          Appid: 
+          Appid: wx30e71b02bd815d8b
           CDN: 
           assetLoadType: 1
           compressDataPackage: 0
@@ -77,11 +77,11 @@ MonoBehaviour:
           fbslim: 0
           DeleteStreamingAssets: 1
           ProfilingMemory: 0
-          CleanBuild: 0
+          CleanBuild: 1
           CustomNodePath: 
           autoAdaptScreen: 1
           showMonitorSuggestModal: 1
-          enableProfileStats: 0
+          enableProfileStats: 1
           enableRenderAnalysis: 0
           enablePerfAnalysis: 0
           iOSAutoGCInterval: 10000

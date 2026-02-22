@@ -77,6 +77,9 @@ namespace GeometryWarrior
         
         public void StartGame()
         {
+            // 确保时间正常运行（防止之前被暂停）
+            Time.timeScale = 1f;
+            
             gameTime = 0f;
             score = 0;
             
@@ -226,6 +229,7 @@ namespace GeometryWarrior
         
         private void SetGameState(GameState newState)
         {
+            Debug.Log($"[GameManager] SetGameState: {newState}");
             currentState = newState;
             OnGameStateChanged?.Invoke(currentState);
             UpdateUIForState();
@@ -233,6 +237,8 @@ namespace GeometryWarrior
         
         private void UpdateUIForState()
         {
+            Debug.Log($"[GameManager] UpdateUIForState: {currentState}, hudCanvas={hudCanvas != null}");
+            
             if (mainMenuPanel != null)
             {
                 if (currentState == GameState.Menu)
@@ -243,7 +249,13 @@ namespace GeometryWarrior
             
             if (hudCanvas != null)
             {
-                hudCanvas.SetActive(currentState == GameState.Playing);
+                bool shouldShow = currentState == GameState.Playing;
+                hudCanvas.SetActive(shouldShow);
+                Debug.Log($"[GameManager] HUD Canvas set to {shouldShow}");
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] hudCanvas is null!");
             }
             
             if (gameOverPanel != null)

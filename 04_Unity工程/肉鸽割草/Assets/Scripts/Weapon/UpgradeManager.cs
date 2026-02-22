@@ -51,6 +51,13 @@ namespace GeometryWarrior
         
         private void Start()
         {
+            // 确保游戏时间正常（防止之前异常退出导致时间暂停）
+            if (Time.timeScale == 0f)
+            {
+                Time.timeScale = 1f;
+                Debug.Log("[UpgradeManager] Reset Time.timeScale to 1");
+            }
+            
             // Try to get WeaponManager
             weaponManager = WeaponManager.Instance;
             if (weaponManager == null)

@@ -36,7 +36,7 @@ const unityNamespace = {
     // AssetBundle在内存中的存活时间
     ttlAssetBundle: 5,
     // 是否显示性能面板
-    enableProfileStats: false,
+    enableProfileStats: true,
     // 是否预载微信系统字体
     preloadWXFont: false,
     // iOS高性能模式定期GC间隔
