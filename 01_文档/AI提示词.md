@@ -1,215 +1,413 @@
-# 肉鸽割草 - AI提示词
+# AI美术资产生成提示词 - 绒毛几何物语
 
-## 🎮 代码生成提示词
+## 通用黄金结构
 
-### 提示词1：玩家控制器
+### 基础模板
 ```
-请用C#写一个Unity 2D肉鸽割草游戏的玩家控制器PlayerController.cs，要求：
+Pure top-down orthographic view, flat 2D, looking directly down for game asset.
 
-功能需求：
-1. 使用虚拟摇杆或触屏拖动控制角色移动
-2. 角色自动攻击最近的敌人
-3. 显示血条，受到伤害扣血，血量为0死亡
-4. 拾取经验球后升级
+[主体描述]
 
-技术要求：
-- 使用Unity的2D物理系统
-- 代码要有详细中文注释
-- 参数可在Inspector中调整（移动速度、攻击速度、攻击力等）
-- 适配手机触屏操作
+羊毛毡材质与手作细节：
+Made of soft wool felt, fuzzy edges with visible fiber texture, clearly visible hand stitching along edges, crafted by hand appearance, plush toy like surface, slightly uneven handmade texture, soft and fuzzy material.
 
-返回完整C#代码，包含using语句。
-```
+治愈系色彩与光影：
+Pastel colors, muted color palette, soft [pink/mint green/baby blue/lavender/cream yellow/beige], warm diffused lighting from above, casting very soft shadows, no harsh shadows, cozy atmosphere.
 
-### 提示词2：敌人系统
-```
-请用C#写一套Unity 2D肉鸽割草游戏的敌人系统，包含以下脚本：
+风格与氛围参考：
+Kawaii, healing, cozy, whimsical, handmade diorama, Ghibli-style aesthetic, storybook illustration style, heartwarming and friendly.
 
-1. EnemyBase.cs - 敌人基类
-   - 血量、移动速度、攻击力
-   - 向玩家移动
-   - 受伤和死亡逻辑
-   - 掉落经验球
-
-2. EnemySpawner.cs - 敌人生成器
-   - 随时间生成敌人
-   - 波次系统（难度逐渐提升）
-   - 不同类型的敌人配置
-
-3. 近战敌人和远程敌人各一个示例
-
-技术要求：
-- 使用对象池优化性能
-- 敌人预制体化
-- 参数可配置
-- 中文注释
-
-返回完整代码。
-```
-
-### 提示词3：武器系统
-```
-请用C#写一个Unity 2D肉鸽割草游戏的武器系统，要求：
-
-功能：
-1. WeaponBase.cs - 武器基类，定义攻击方式、伤害、冷却时间
-2. 示例武器：
-   - 回旋镖：投掷后返回
-   - 激光：穿透敌人
-   - 炸弹：范围伤害
-3. WeaponManager.cs - 管理玩家的所有武器，处理升级逻辑
-
-技术要求：
-- 面向对象设计，易于扩展新武器
-- 支持武器升级（增加伤害、范围、频率等）
-- 中文注释
-
-返回完整代码。
-```
-
-### 提示词4：升级系统
-```
-请用C#写一个Unity 2D肉鸽割草游戏的升级系统，要求：
-
-功能：
-1. 玩家拾取经验球获得经验值
-2. 经验满后升级，弹出3选1界面
-3. 选项包括：新武器、强化已有武器、获得道具
-4. UpgradeManager.cs管理所有可选升级内容
-5. 升级数据用ScriptableObject配置
-
-技术要求：
-- 使用ScriptableObject存储升级配置
-- UI使用Unity的UGUI
-- 中文注释
-
-返回完整代码。
-```
-
-### 提示词5：游戏管理器
-```
-请用C#写一个Unity 2D肉鸽割草游戏的游戏管理器GameManager.cs，要求：
-
-功能：
-1. 单例模式管理游戏状态
-2. 游戏状态：开始界面、游戏中、暂停、结束
-3. 计时系统（生存时间）
-4. 分数/金币计算
-5. 本地保存最高分
-
-技术要求：
-- 使用事件系统（UnityEvent或C# event）通知其他组件
-- 中文注释
-
-返回完整代码。
-```
-
-### 提示词6：UI系统
-```
-请用C#写一套Unity 2D肉鸽割草游戏的UI系统，包含：
-
-1. MainMenuUI.cs - 主菜单（开始游戏、设置）
-2. HUD.cs - 游戏内界面（血条、经验条、时间、金币）
-3. UpgradeUI.cs - 升级选择界面（3选1）
-4. GameOverUI.cs - 游戏结束界面（分数、重新开始）
-
-技术要求：
-- 使用UGUI + TextMeshPro
-- 界面切换有简单动画
-- 中文注释
-
-返回完整代码。
+技术参数与负面禁忌：
+--ar 1:1 --style raw --v 6.0
+Negative: cyberpunk, neon, geometric sharp edges, metallic, shiny, hard surface, plastic, realistic, photorealistic, violent, dark, gloomy, pixel art, anime style, humanoid, robotic, sharp corners
 ```
 
 ---
 
-## 🎨 美术生成提示词 - 几何战士风格
+## 角色/精灵类
 
-### 玩家角色 - 几何战士
+### 基础编织精灵（无皮肤）
 ```
-2D游戏主角，青色六边形几何体，霓虹发光边缘，科技能量核心，黑色背景，俯视视角，赛博朋克风格，发光拖尾效果，简约几何设计
-```
+Pure top-down orthographic view of a character sprite, isolated on transparent background.
 
-### 近战敌人 - 红色三角形
-```
-2D游戏敌人，红色三角形几何体，尖角朝前，霓虹红光边缘，攻击性设计，黑色背景，俯视视角，发光效果，简约几何风格
-```
+A cute round creature, the player's avatar, a small spirit made of cream-colored wool felt.
 
-### 远程敌人 - 绿色菱形
-```
-2D游戏敌人，绿色菱形几何体，中心有能量核心，霓虹绿光边缘，黑色背景，俯视视角，科幻风格，简约几何设计
-```
+The entire body is a soft fuzzy ball of wool felt with visible fiber texture. Small stubby arms and legs. Two tiny black button eyes sewn on. A small embroidered smile. The surface looks soft, fuzzy, and slightly uneven like real handmade felt craft.
 
-### 坦克敌人 - 橙色正方形
-```
-2D游戏敌人，橙色正方形几何体，厚重边框，霓虹橙光，防御感设计，黑色背景，俯视视角，金属质感，简约几何风格
+Pastel cream yellow and soft white colors. Warm light beige tones. Soft, gentle lighting that highlights the fuzz texture. No harsh shadows.
+
+Kawaii, adorable plush toy, heartwarming and friendly, like a living handmade craft.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: robotic, humanoid, anime, sharp edges, plastic shine, mechanical, background, shadow
 ```
 
-### 精英敌人 - 紫色五角星
+### 小熊皮肤套装
 ```
-2D游戏敌人，紫色五角星几何体，旋转能量光环，霓虹紫光，黑色背景，俯视视角，华丽发光效果，几何设计
+Pure top-down orthographic view of a character sprite, isolated on transparent background.
+
+A cute teddy bear character with a round fluffy body, wearing as a costume/skin for a small spirit.
+
+The entire bear is crafted from light brown wool felt. Clearly visible dark brown stitching outlines its arms, legs, ears, and smiling mouth. The eyes and nose are small shiny black buttons sewn on securely. Round ears on top. Small stubby limbs. The surface looks soft, fuzzy, and slightly uneven like real felt.
+
+Warm light brown and beige tones. Soft, gentle lighting that highlights the fuzz texture.
+
+Kawaii, adorable plush toy, heartwarming and friendly.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: robotic, humanoid, anime, sharp edges, plastic shine, mechanical, background
 ```
 
-### Boss - 多层圆形
+### 小猫皮肤套装
 ```
-2D游戏Boss，多层同心圆几何体，霓虹渐变色彩（红到紫），能量脉冲效果，黑色背景，俯视视角，科幻感，复杂几何图案
+Pure top-down orthographic view of a character sprite, isolated on transparent background.
+
+A cute cat character costume for a small round spirit. Fluffy round body with cat ears on top.
+
+Made of soft gray and white wool felt with visible fiber texture. Clearly visible hand stitching. Small triangular felt ears with pink inner felt. Tiny black button eyes. Small embroidered nose and mouth. A tiny bell collar made of yellow felt. Two small paw-like appendages visible. Soft fluffy tail.
+
+Soft gray, white, and pastel pink colors. Warm, gentle lighting.
+
+Kawaii cat plush toy, adorable and friendly.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic cat, sharp edges, plastic, background
 ```
 
-### 能量核心
+### 小兔皮肤套装
 ```
-2D游戏道具，金色多面体几何体，旋转发光，能量粒子环绕，黑色背景，俯视视角，霓虹光效，简约设计
-```
+Pure top-down orthographic view of a character sprite, isolated on transparent background.
 
-### 武器图标 - 激光
-```
-游戏UI图标，青色激光光束，几何线条，霓虹发光，黑色背景，扁平设计，科技感，简约风格
-```
+A cute bunny character costume for a small round spirit. Round fluffy body with long bunny ears.
 
-### 武器图标 - 导弹
-```
-游戏UI图标，橙色导弹形状，几何设计，尾焰效果，霓虹发光，黑色背景，扁平设计，科技感
-```
+Made of soft white wool felt with visible fiber texture and hand stitching. Long floppy ears with pastel pink inner felt. Small black button eyes. Tiny pink embroidered nose. Small round cotton tail. Small paw-like limbs.
 
-### 武器图标 - 护盾
-```
-游戏UI图标，蓝色六边形护盾，几何边框，能量场效果，霓虹发光，黑色背景，扁平设计
-```
+Soft white and pastel pink colors. Pure and gentle aesthetic.
 
-### 游戏背景 - 霓虹网格
-```
-俯视游戏场景，深紫色渐变背景，青色霓虹网格线，科技感地面，远处有发光几何建筑，赛博朋克风格，暗色调，简约设计
-```
+Kawaii bunny plush, adorable and sweet.
 
-### UI按钮 - 霓虹风格
-```
-游戏UI按钮，圆角矩形，青色到蓝色渐变，霓虹发光边框，科技感，黑色背景，扁平设计，发光文字区域
-```
-
-### 技能图标框
-```
-游戏UI技能框，六边形边框，霓虹发光边缘，内部深色，科技感设计，黑色背景，扁平风格
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic rabbit, sharp edges, background
 ```
 
 ---
 
-## 🎵 音效生成提示词
+## 互动对象（调皮元素）
 
-### 射击音效
+### 毛线团怪（混乱状态）
 ```
-生成科幻激光射击音效，短促，清脆，8-bit风格，适合手机游戏的反馈音
+Pure top-down orthographic view of a game character, isolated on transparent background.
+
+A messy tangled ball of yarn, a cute but chaotic creature. Multiple colored threads tangled together - red, blue, yellow, green yarn strands all mixed up. Some loose thread ends sticking out in various directions. The ball shape is irregular and lopsided. Two small button eyes peeking out from the tangle. Small felt feet sticking out from bottom.
+
+Multiple bright pastel yarn colors tangled together - pink, mint green, baby blue, lavender, cream. Visible fuzzy yarn texture. Threads going in different directions creating chaos.
+
+Whimsical, cute chaos, handmade craft creature, kawaii monster.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: neat, organized, geometric, metallic, background
 ```
 
-### 爆炸音效
+### 毛线团怪（安抚后 - 整齐状态）
 ```
-生成低沉闷响的爆炸音效，适合敌人死亡，有冲击力，持续0.5秒
+Pure top-down orthographic view of a game character/prop, isolated on transparent background.
+
+A perfectly round, neatly wound ball of yarn. Smooth spherical shape with yarn wrapped evenly. One single color - warm pastel pink. The end of the yarn tucked in neatly. A small felt tag attached with a tiny button. Two small black button eyes and a small smile embroidered on.
+
+Soft pastel pink yarn color. Warm cream felt tag. Visible soft yarn texture, fuzzy but orderly.
+
+Satisfying, neat, organized, cute and content, kawaii craft.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: messy, tangled, multiple colors, background
 ```
 
-### 升级音效
+### 脱线小兵（待修复）
 ```
-生成欢快明亮的升级提示音，有成就感，上升音调，适合游戏升级反馈
+Pure top-down orthographic view of a game character, isolated on transparent background.
+
+A small felt doll creature made of simple geometric shapes but looking sad. Blue rectangular felt body with visible stuffing coming out from seams. White felt head with two black button eyes looking downcast. One arm hanging loose with thread coming out. Small felt feet. A loose thread trail behind it.
+
+Soft pastel blue and white felt. Visible cream-colored stuffing poking out. Black buttons for eyes. Gray loose thread.
+
+Sad but cute, needs help, pitiful but adorable, handmade doll.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: scary, horror, realistic doll, background
 ```
 
-### 背景音乐
+### 脱线小兵（修复后）
 ```
-生成循环电子音乐，快节奏，紧张感，适合肉鸽割草游戏，BPM 120-140，无歌词
+Pure top-down orthographic view of a game character, isolated on transparent background.
+
+A small happy felt doll creature. Blue rectangular felt body with neat visible stitching along all edges. White felt head with two shiny black button eyes looking happy. Arms and legs properly attached with neat stitches. A small smile embroidered on. Looking cheerful and content.
+
+Soft pastel blue and white felt. Clean neat stitching in cream thread. Happy expression.
+
+Repaired, happy, content, cute companion, handmade doll friend.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: sad, broken, loose threads, background
 ```
+
+### 纽扣眼魔偶（歪斜状态）
+```
+Pure top-down orthographic view of a game character, isolated on transparent background.
+
+A cute felt plush creature looking slightly confused. Round pink felt body. Two mismatched buttons for eyes - one large brown button slightly askew, one smaller black button at a different angle. Small felt ears. Two tiny felt feet. A small uncertain embroidered mouth. Slightly tilted posture.
+
+Soft pastel pink felt. Mismatched buttons - one brown wooden button, one black plastic button. Cream stitching.
+
+Confused but cute, quirky, slightly silly, endearing.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: scary, horror, perfectly symmetrical, background
+```
+
+### 纽扣眼魔偶（修复后）
+```
+Pure top-down orthographic view of a game character, isolated on transparent background.
+
+A happy felt plush creature. Round pink felt body. Two matching shiny black button eyes perfectly aligned. Small felt ears standing up. Two tiny felt feet. A big happy embroidered smile. Standing upright and cheerful.
+
+Soft pastel pink felt. Matching black buttons. Cream stitching. Happy expression.
+
+Happy, content, symmetrical, cute friend, joyful.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: asymmetrical, confused, sad, background
+```
+
+---
+
+## 场景/地面素材
+
+### 毛线森林草地（无缝贴图）
+```
+Pure top-down orthographic view, flat 2D, seamless texture tile for game.
+
+A single modular square tile of forest ground for a wool felt world.
+
+Made entirely of soft green wool felt. The surface has a fuzzy, uneven handmade texture. The edges of the square are defined by thick visible brown embroidery stitching. Scattered tiny felt flowers in pastel colors sewn onto the surface. Small felt leaves here and there. Subtle texture variation.
+
+Soft pastel green base with scattered pink, yellow, and blue felt flower accents. Warm diffused lighting from above, casting very soft shadows.
+
+Whimsical handmade diorama, cozy and magical, storybook forest floor.
+
+--ar 1:1 --style raw --v 6.0 --tile
+Negative: realistic grass, dirt, pixel art, cyberpunk, geometric pattern
+```
+
+### 纽扣平原地面（无缝贴图）
+```
+Pure top-down orthographic view, flat 2D, seamless texture tile for game.
+
+A single modular square tile of plain ground for a wool felt world.
+
+Made of beige canvas or linen texture base. Scattered colorful buttons of various sizes sewn onto the surface - round buttons in pastel pink, blue, yellow, green, white. Some buttons have two holes, some have four. Visible thread stitching attaching buttons. Soft felt patches between buttons.
+
+Warm beige canvas base. Pastel colored buttons - pink, mint green, baby blue, cream yellow, lavender. Visible thread in contrasting colors.
+
+Crafty, playful, button collection, handmade feel.
+
+--ar 1:1 --style raw --v 6.0 --tile
+Negative: realistic dirt, sand, pixel art, cyberpunk
+```
+
+### 碎布海湾水面（无缝贴图）
+```
+Pure top-down orthographic view, flat 2D, seamless texture tile for game.
+
+A single modular square tile of water surface made of fabric for a wool felt world.
+
+Made of various shades of blue fabric patches sewn together - denim, corduroy, cotton in light blue, sky blue, navy blue. Visible stitching between patches creating a quilted pattern. Subtle wave-like texture in the fabric. Some patches have small white felt "bubbles" or "foam".
+
+Soft blues ranging from pale sky blue to deep navy. White accents for foam. Visible cream or white stitching between patches.
+
+Calm, peaceful, fabric ocean, quilted water, gentle waves.
+
+--ar 1:1 --style raw --v 6.0 --tile
+Negative: realistic water, waves, reflection, pixel art
+```
+
+---
+
+## 收集物/道具
+
+### 基础毛线球（材料）
+```
+Pure top-down orthographic view of a small object icon, isolated on transparent background.
+
+A small ball of yarn, a crafting material item.
+
+Neatly wound ball of pastel colored yarn. Smooth round shape. Single color - soft pink. The yarn end tucked in. Small size suitable for crafting. Visible soft yarn texture.
+
+Soft pastel pink yarn. Warm lighting.
+
+Craft material, collectible, cute and useful.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: messy, multiple colors, background
+```
+
+### 彩色纽扣（材料）
+```
+Pure top-down orthographic view of a small object icon, isolated on transparent background.
+
+A single colorful sewing button, a crafting material item.
+
+Round button made of pastel colored plastic or wood. Four holes in the center with thread visible. Slight shine but not metallic. Small size. Clean and simple design.
+
+Pastel pink button with white thread. Or mint green, baby blue, cream yellow variations.
+
+Craft supply, sewing notion, collectible material.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: gemstone, metal, realistic, background
+```
+
+### 复古顶针（稀有材料）
+```
+Pure top-down orthographic view of a small object icon, isolated on transparent background.
+
+A vintage thimble, a rare crafting material item.
+
+Classic metal thimble with dimpled texture on top. Brass or copper color with slight vintage patina. Small size. Round top, cylindrical shape. Placed on a small circular patch of navy blue felt with tiny white cross-stitch patterns around the edge.
+
+Warm metallic brass against deep navy blue and white stitching. Vintage aesthetic.
+
+Valuable craft tool, antique, rare collectible.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: modern plastic, new, shiny chrome, background
+```
+
+### 棉花云（家园材料）
+```
+Pure top-down orthographic view of a small object icon, isolated on transparent background.
+
+A fluffy cotton ball shaped like a small cloud, a decorative material.
+
+Pure white cotton wool formed into an irregular cloud shape. Soft fluffy texture. Some loose fibers visible. Light and airy appearance. Small size suitable for decoration.
+
+Pure white with soft shadows. Clean and fluffy.
+
+Soft decoration, cloud element, gentle aesthetic.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: gray, dirty, realistic cloud, background
+```
+
+---
+
+## 家园家具
+
+### 羊毛毡沙发
+```
+Pure top-down orthographic view of a furniture piece, isolated on transparent background.
+
+A small cozy sofa made entirely of wool felt for a miniature craft world.
+
+Plush sofa with rounded shapes - curved back, rounded armrests, soft cushions. Made of warm brown wool felt with visible fiber texture. Visible hand stitching along edges in cream thread. Two small throw pillows in contrasting pastel colors. Small felt legs.
+
+Warm brown felt with cream stitching. Pastel pink and mint green accent pillows.
+
+Cozy furniture, handmade dollhouse style, comfortable and cute.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic furniture, wood, leather, background
+```
+
+### 刺绣挂画
+```
+Pure top-down orthographic view of a wall decoration, isolated on transparent background.
+
+A small embroidered wall art piece in a simple frame.
+
+Linen or felt background with colorful embroidery pattern - perhaps flowers, stars, or a cute animal. Simple wooden or felt frame around it. Visible embroidery stitches in various colors. Small size suitable for dollhouse scale.
+
+Natural linen color with colorful embroidery threads - pink, green, yellow, blue.
+
+Handmade art, craft decoration, personal touch.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic painting, photograph, background
+```
+
+### 编织花篮
+```
+Pure top-down orthographic view of a decoration piece, isolated on transparent background.
+
+A small woven basket with felt flowers, a decorative item.
+
+Round woven basket made of natural-colored yarn or rattan. Filled with colorful felt flowers - pink roses, yellow daisies, blue forget-me-nots. Some green felt leaves. Flowers in various heights. Small scale.
+
+Natural basket color with pastel felt flowers in pink, yellow, blue, white. Green leaves.
+
+Fresh decoration, handmade flowers, cheerful accent.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic flowers, plastic flowers, background
+```
+
+---
+
+## 特效/UI元素
+
+### 安抚命中特效（爆炸帧）
+```
+Pure top-down view of a VFX sprite, isolated on transparent background.
+
+A burst of soft colorful wool fibers and sparkles, a hit effect.
+
+Explosion of soft pastel-colored wool fluff - pink, yellow, blue, green fibers flying outward. Small star sparkles mixed in. Soft edges, no hard lines. Fuzzy texture throughout. Circular burst pattern.
+
+Pastel rainbow colors - pink, mint, lavender, cream, baby blue. Soft glow.
+
+Satisfying, soft impact, magical craft burst.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: realistic explosion, fire, sparks, blood, violent, background
+```
+
+### 收集星光特效
+```
+Pure top-down view of a VFX sprite, isolated on transparent background.
+
+A soft glowing star sparkle, a collection effect.
+
+Soft glowing star shape made of light. Fuzzy edges like a felt star. Small sparkles around it. Warm glow emanating from center. Simple but charming.
+
+Warm golden yellow glow with white center. Soft light rays.
+
+Magical, rewarding, gentle celebration.
+
+--ar 1:1 --style raw --v 6.0 --no background
+Negative: harsh light, neon, electric, background
+```
+
+---
+
+## 使用说明
+
+### 生成流程建议
+1. **先生成核心角色：** 基础精灵 + 2-3个皮肤
+2. **再生成互动对象：** 毛线团怪（混乱/安抚后）+ 脱线小兵
+3. **然后场景素材：** 3种地面无缝贴图
+4. **最后补充：** 收集物、家具、特效
+
+### 质量检查要点
+- ✅ 是否有羊毛毡/毛绒质感？
+- ✅ 是否有可见的手缝线细节？
+- ✅ 颜色是否为马卡龙/ pastel 色系？
+- ✅ 光影是否柔和温暖？
+- ✅ 是否有「可爱」「治愈」的感觉？
+- ❌ 是否避免了尖锐几何边缘？
+- ❌ 是否避免了霓虹/赛博元素？
+- ❌ 是否避免了写实风格？
+
+### 后期处理
+- 使用图像编辑软件去除背景
+- 统一调整饱和度和亮度
+- 确保所有素材视角一致（正俯视）
+- 按类别整理到项目文件夹
