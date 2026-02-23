@@ -92,7 +92,7 @@ namespace GeometryWarrior
         {
             if (scoreText != null)
             {
-                scoreText.text = $"Score: {score}";
+                scoreText.text = $"分数:{score}";
             }
         }
         
