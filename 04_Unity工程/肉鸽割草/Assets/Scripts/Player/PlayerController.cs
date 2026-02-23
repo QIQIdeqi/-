@@ -254,10 +254,12 @@ namespace GeometryWarrior
             }
             
             // Flip sprite based on movement
-            if (moveInput.x > 0)
-                spriteRenderer.flipX = false;
-            else if (moveInput.x < 0)
-                spriteRenderer.flipX = true;
+            // DISABLED: Custom shader has UV calculation issues with flipX/scale.x
+            // TODO: Re-enable after fixing shader or using symmetric sprite
+            // if (moveInput.x > 0)
+            //     transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            // else if (moveInput.x < 0)
+            //     transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
         
         private void AutoAttack()

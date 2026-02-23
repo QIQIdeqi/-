@@ -154,13 +154,15 @@ namespace GeometryWarrior
             Vector2 direction = (player.position - transform.position).normalized;
             rb.velocity = direction * moveSpeed;
             
-            if (spriteRenderer != null)
-            {
-                if (direction.x > 0)
-                    spriteRenderer.flipX = false;
-                else if (direction.x < 0)
-                    spriteRenderer.flipX = true;
-            }
+            // DISABLED: Custom shader has UV calculation issues with flipX
+            // TODO: Re-enable after fixing shader or using symmetric sprite
+            // if (spriteRenderer != null)
+            // {
+            //     if (direction.x > 0)
+            //         spriteRenderer.flipX = false;
+            //     else if (direction.x < 0)
+            //         spriteRenderer.flipX = true;
+            // }
         }
         
         #region 伤害处理
