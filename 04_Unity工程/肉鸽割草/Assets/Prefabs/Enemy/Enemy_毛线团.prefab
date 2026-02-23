@@ -87,8 +87,8 @@ GameObject:
   - component: {fileID: 104065841934354159}
   - component: {fileID: 7776876419980741593}
   - component: {fileID: 9197878814042139810}
-  - component: {fileID: 5605139581717877650}
   - component: {fileID: 4813304139848891539}
+  - component: {fileID: 5605139581717877650}
   m_Layer: 6
   m_HasEditorInfo: 1
   m_Name: "Enemy_\u6BDB\u7EBF\u56E2"
@@ -197,29 +197,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5605139581717877650
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3509956855670433914}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2238e5e3029da248b543fbf908f9fb1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseMaxHealth: 30
-  baseAttackDamage: 10
-  baseMoveSpeed: 2
-  baseExpValue: 10
-  expOrbPrefab: {fileID: 6181903860977687526, guid: 5b706c5b91b612d49a7e5337f0cc666a, type: 3}
-  useCustomColor: 1
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  burningEffect: {fileID: 0}
-  frozenEffect: {fileID: 0}
-  slowEffect: {fileID: 0}
 --- !u!58 &4813304139848891539
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -255,6 +232,29 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.03472033}
   serializedVersion: 2
   m_Radius: 0.3371105
+--- !u!114 &5605139581717877650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3509956855670433914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2238e5e3029da248b543fbf908f9fb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseMaxHealth: 30
+  baseAttackDamage: 10
+  baseMoveSpeed: 2
+  baseExpValue: 10
+  expOrbPrefab: {fileID: 6181903860977687526, guid: 5b706c5b91b612d49a7e5337f0cc666a, type: 3}
+  useCustomColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  burningEffect: {fileID: 0}
+  frozenEffect: {fileID: 0}
+  slowEffect: {fileID: 0}
 --- !u!1 &4218848933610678273
 GameObject:
   m_ObjectHideFlags: 0

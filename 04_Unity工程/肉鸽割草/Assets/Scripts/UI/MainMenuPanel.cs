@@ -10,7 +10,7 @@ namespace GeometryWarrior
     public class MainMenuPanel : MonoBehaviour
     {
         [Header("[Display Texts]")]
-        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private Image titleImage;  // Title changed from Text to Image (Logo)
         [SerializeField] private TextMeshProUGUI highScoreText;
         [SerializeField] private TextMeshProUGUI energyCoinsText;
         
