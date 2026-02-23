@@ -1,0 +1,10 @@
+﻿# 几何战士 - 难度递增记录
+# 会话ID: 20260223_195802
+# 开始时间: 2026-02-23 19:58:02
+# 总游戏时间: 15.02秒
+# 最终难度等级: 3
+
+GameTime,Level,SpawnInterval,MaxEnemies,ActiveEnemies,EnemyMultiplier,EnemyMaxHealth,EnemyAttack
+5.01,1,0.909,33,3,1.10,33,11
+10.01,2,0.826,36,6,1.21,36,12
+15.02,3,0.751,40,7,1.33,40,13

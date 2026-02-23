@@ -51,13 +51,13 @@ namespace GeometryWarrior
             // int highScore = PlayerPrefs.GetInt("HighScore", 0);
             if (highScoreText != null)
             {
-                highScoreText.text = "High Score: 0";
+                highScoreText.text = "最高分: 0";
             }
             
             // int energyCoins = PlayerPrefs.GetInt("EnergyCoins", 0);
             if (energyCoinsText != null)
             {
-                energyCoinsText.text = "Energy: 0";
+                energyCoinsText.text = "能量币: 0";
             }
         }
         
