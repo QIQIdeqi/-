@@ -41,6 +41,32 @@ namespace GeometryWarrior
         private void Start()
         {
             mainCamera = Camera.main;
+            
+            // 确保有碰撞体（用于接收鼠标事件）
+            EnsureCollider();
+        }
+        
+        /// <summary>
+        /// 确保装饰物有碰撞体（用于拖拽）
+        /// </summary>
+        private void EnsureCollider()
+        {
+            // 检查是否已有 2D 碰撞体
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider == null)
+            {
+                // 自动添加 BoxCollider2D
+                BoxCollider2D boxCollider = gameObject.AddComponent<BoxCollider2D>();
+                
+                // 如果有 SpriteRenderer，根据 Sprite 大小调整碰撞体
+                SpriteRenderer sr = GetComponent<SpriteRenderer>();
+                if (sr != null && sr.sprite != null)
+                {
+                    boxCollider.size = sr.sprite.bounds.size;
+                }
+                
+                Debug.Log($"[HomeDecoration] 自动添加 BoxCollider2D: {decorationName}");
+            }
         }
         
         private void OnMouseDown()

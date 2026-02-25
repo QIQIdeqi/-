@@ -46,9 +46,6 @@ namespace GeometryWarrior
         [Tooltip("右墙预制体（完整的一面墙）")]
         [SerializeField] private GameObject rightWallPrefab;
         
-        [Tooltip("墙的高度（像素单位，用于计算缩放）")]
-        [SerializeField] private float wallHeightPixels = 358f;
-        
         [Tooltip("墙的Y轴偏移（用于微调墙与地板的对齐）")]
         [SerializeField] private float wallYOffset = 0f;
         
