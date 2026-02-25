@@ -220,37 +220,17 @@ namespace GeometryWarrior
         
         private void HandleInput()
         {
-            // 优先使用虚拟摇杆输入
+            // 使用虚拟摇杆输入
             if (joystick != null && joystick.IsDragging)
             {
                 moveInput = joystick.GetDirection();
             }
             else
             {
-                // Keyboard input
+                // Keyboard input (PC端备用)
                 float horizontal = Input.GetAxisRaw("Horizontal");
                 float vertical = Input.GetAxisRaw("Vertical");
-                
-                // Mouse click to move (for mobile/touch)
-                if (Input.GetMouseButton(0))
-                {
-                    Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    mousePos.z = 0;
-                    Vector2 direction = (mousePos - transform.position).normalized;
-                    
-                    if (Vector2.Distance(mousePos, transform.position) > 0.5f)
-                    {
-                        moveInput = direction;
-                    }
-                    else
-                    {
-                        moveInput = Vector2.zero;
-                    }
-                }
-                else
-                {
-                    moveInput = new Vector2(horizontal, vertical).normalized;
-                }
+                moveInput = new Vector2(horizontal, vertical).normalized;
             }
             
             // Flip sprite based on movement
