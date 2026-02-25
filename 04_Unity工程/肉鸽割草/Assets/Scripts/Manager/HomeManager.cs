@@ -22,6 +22,9 @@ namespace GeometryWarrior
         [Tooltip("玩家进入家园时的出生位置")]
         [SerializeField] private Transform playerSpawnPoint;
         
+        [Tooltip("虚拟摇杆（用于玩家移动控制）")]
+        [SerializeField] private Joystick joystick;
+        
         [Header("【装饰物】")]
         [Tooltip("家园中的所有装饰物列表")]
         [SerializeField] private List<HomeDecoration> decorations = new List<HomeDecoration>();
@@ -68,6 +71,17 @@ namespace GeometryWarrior
             
             if (player != null)
             {
+                // 设置虚拟摇杆
+                if (joystick != null)
+                {
+                    player.joystick = joystick;
+                }
+                else
+                {
+                    // 自动查找场景中的摇杆
+                    player.joystick = FindObjectOfType<Joystick>();
+                }
+                
                 // 应用当前装扮
                 ApplyPlayerOutfit();
             }
