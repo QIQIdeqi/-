@@ -14,7 +14,8 @@ namespace GeometryWarrior
             Menu,       // Main menu
             Playing,    // Game in progress
             Paused,     // Paused
-            GameOver    // Game over
+            GameOver,   // Game over
+            Home        // Home scene
         }
         
         [Header("[Game State]")]
@@ -28,6 +29,9 @@ namespace GeometryWarrior
         [SerializeField] private MainMenuPanel mainMenuPanel;
         [SerializeField] private GameOverPanel gameOverPanel;
         [SerializeField] private GameObject hudCanvas;
+        
+        [Header("[Scene Names]")]
+        [SerializeField] private string homeSceneName = "HomeScene";  // 家园场景名称
         
         [Header("[Game Data]")]
         [SerializeField] private float gameTime = 0f;
@@ -244,6 +248,34 @@ namespace GeometryWarrior
             }
             
             SetGameState(GameState.Menu);
+        }
+        
+        /// <summary>
+        /// 进入家园场景
+        /// </summary>
+        public void EnterHomeScene()
+        {
+            Debug.Log("[GameManager] Entering home scene...");
+            
+            // 清理当前游戏状态
+            Time.timeScale = 1f;
+            
+            if (Player != null)
+            {
+                Destroy(Player.gameObject);
+                Player = null;
+            }
+            
+            EnemySpawner spawner = FindObjectOfType<EnemySpawner>();
+            if (spawner != null)
+            {
+                spawner.ClearAllEnemies();
+            }
+            
+            SetGameState(GameState.Home);
+            
+            // 加载家园场景
+            UnityEngine.SceneManagement.SceneManager.LoadScene(homeSceneName);
         }
         
         private void SetGameState(GameState newState)

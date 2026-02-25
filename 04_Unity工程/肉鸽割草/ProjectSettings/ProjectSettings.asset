@@ -42,7 +42,7 @@ PlayerSettings:
     height: 1
   m_SplashScreenLogos: []
   m_VirtualRealitySplashScreen: {fileID: 0}
-  expectedBundleIdentifier: 
+  expectedBundleIdentifier: com.DefaultCompany.------------
   integrityHash: 
   m_HolographicTrackingLossScreen: {fileID: 0}
   defaultScreenWidth: 1920
@@ -1024,7 +1024,7 @@ PlayerSettings:
     -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s TOTAL_MEMORY=256MB -s EXPORTED_RUNTIME_METHODS=''["ccall","cwrap","stackTrace","addRunDependency","removeRunDependency","FS_createPath","FS_createDataFile","stackTrace","writeStackCookie","checkStackCookie","lengthBytesUTF8","stringToUTF8"]''
     --profiling-funcs '
   weixinMiniGameModulesDirectory: 
-  weixinMiniGameTemplate: "PATH:D:\\03_\u72EC\u7ACB\u6E38\u620F\\\u81EA\u5DF1\\\u5FAE\u4FE1\u5C0F\u6E38\u620F\\01_\u9879\u76EE\\\u9879\u76EE01_\u8089\u9E3D\u5272\u8349\\04_Unity\u5DE5\u7A0B\\\u8089\u9E3D\u5272\u8349\\Library\\PackageCache\\com.qq.weixin.minigame@4443e5a9bc\\WebGLTemplates\\WXTemplate2022TJ"
+  weixinMiniGameTemplate: APPLICATION:Default
   weixinMiniGameAnalyzeBuildSize: 0
   weixinMiniGameUseEmbeddedResources: 0
   weixinMiniGameCompressionFormat: 2

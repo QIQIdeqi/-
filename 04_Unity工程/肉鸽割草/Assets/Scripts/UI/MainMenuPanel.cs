@@ -5,18 +5,31 @@ using TMPro;
 namespace GeometryWarrior
 {
     /// <summary>
-    /// Main Menu Panel
+    /// 主菜单面板
     /// </summary>
     public class MainMenuPanel : MonoBehaviour
     {
-        [Header("[Display Texts]")]
-        [SerializeField] private Image titleImage;  // Title changed from Text to Image (Logo)
+        [Header("【显示文本】")]
+        [Tooltip("标题Logo图片")]
+        [SerializeField] private Image titleImage;
+        
+        [Tooltip("最高分显示文本")]
         [SerializeField] private TextMeshProUGUI highScoreText;
+        
+        [Tooltip("能量币显示文本")]
         [SerializeField] private TextMeshProUGUI energyCoinsText;
         
-        [Header("[Buttons]")]
+        [Header("【按钮】")]
+        [Tooltip("开始游戏按钮")]
         [SerializeField] private Button startGameButton;
+        
+        [Tooltip("进入家园场景按钮")]
+        [SerializeField] private Button homeButton;
+        
+        [Tooltip("设置按钮")]
         [SerializeField] private Button settingsButton;
+        
+        [Tooltip("退出游戏按钮")]
         [SerializeField] private Button quitButton;
         
         private GameManager gameManager;
@@ -32,6 +45,9 @@ namespace GeometryWarrior
             
             if (startGameButton != null)
                 startGameButton.onClick.AddListener(OnStartGameClicked);
+            
+            if (homeButton != null)
+                homeButton.onClick.AddListener(OnHomeClicked);
             
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClicked);
@@ -79,6 +95,20 @@ namespace GeometryWarrior
                 {
                     gameManager.StartGame();
                 }
+            }
+        }
+        
+        private void OnHomeClicked()
+        {
+            Debug.Log("[MainMenuPanel] Home clicked! Entering home scene...");
+            
+            if (gameManager != null)
+            {
+                gameManager.EnterHomeScene();
+            }
+            else
+            {
+                Debug.LogError("[MainMenuPanel] gameManager is null!");
             }
         }
         
