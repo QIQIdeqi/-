@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using FluffyGeometry.Home;
 
 namespace GeometryWarrior
 {
@@ -25,6 +27,16 @@ namespace GeometryWarrior
         [Tooltip("虚拟摇杆（用于玩家移动控制）")]
         [SerializeField] private Joystick joystick;
         
+        [Header("【背包系统】")]
+        [Tooltip("背包按钮预制体")]
+        [SerializeField] private GameObject backpackButtonPrefab;
+        
+        [Tooltip("背包按钮父节点（留空则使用Canvas）")]
+        [SerializeField] private Transform backpackButtonParent;
+        
+        [Tooltip("家具编辑控制器预制体")]
+        [SerializeField] private FurnitureEditController furnitureEditControllerPrefab;
+        
         [Header("【装饰物】")]
         [Tooltip("家园中的所有装饰物列表")]
         [SerializeField] private List<HomeDecoration> decorations = new List<HomeDecoration>();
@@ -37,7 +49,17 @@ namespace GeometryWarrior
         [SerializeField] private HomeDoor homeDoor;
         
         private PlayerController player;
+        private FluffyGeometry.UI.BackpackButton backpackButton;
+        private FurnitureEditController currentEditController;
         private const string DECORATION_SAVE_KEY = "HomeDecorations";
+        
+        // 装饰物编辑
+        private HomeDecoration currentEditingDecoration;
+        private GameObject decorationEditToolbar;
+        private Button decoFlipBtn;
+        private Button decoConfirmBtn;
+        private Slider decoScaleSlider;
+        private Text decoScaleValueText;
         
         private void Awake()
         {
@@ -56,6 +78,34 @@ namespace GeometryWarrior
             
             // 加载装饰物位置
             LoadDecorationPositions();
+            
+            // 创建背包按钮
+            CreateBackpackButton();
+        }
+        
+        /// <summary>
+        /// 创建背包按钮
+        /// </summary>
+        private void CreateBackpackButton()
+        {
+            if (backpackButtonPrefab == null) return;
+            
+            Transform parent = backpackButtonParent;
+            if (parent == null)
+            {
+                // 查找Canvas作为父节点
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    parent = canvas.transform;
+                }
+            }
+            
+            if (parent != null)
+            {
+                var btnObj = Instantiate(backpackButtonPrefab, parent);
+                backpackButton = btnObj.GetComponent<FluffyGeometry.UI.BackpackButton>();
+            }
         }
         
         /// <summary>
@@ -129,9 +179,13 @@ namespace GeometryWarrior
         /// </summary>
         private void LoadDecorationPositions()
         {
+            if (decorations == null || decorations.Count == 0) return;
+            
             foreach (var deco in decorations)
             {
-                string key = $"{DECORATION_SAVE_KEY}_{deco.GetComponent<HomeDecoration>().decorationId}";
+                if (deco == null) continue;
+                
+                string key = $"{DECORATION_SAVE_KEY}_{deco.decorationId}";
                 string savedPos = PlayerPrefs.GetString(key, "");
                 
                 if (!string.IsNullOrEmpty(savedPos))
@@ -169,5 +223,418 @@ namespace GeometryWarrior
         {
             decorations.Remove(decoration);
         }
+        
+        /// <summary>
+        /// 进入家具编辑模式
+        /// </summary>
+        public void EnterFurnitureEditMode(FurnitureData furniture, FluffyGeometry.UI.BackpackPanel backpackPanel)
+        {
+            if (furnitureEditControllerPrefab == null) return;
+            
+            // 暂停玩家移动
+            if (player != null)
+            {
+                player.enabled = false;
+            }
+            
+            // 创建编辑控制器
+            var editController = Instantiate(furnitureEditControllerPrefab);
+            currentEditController = editController.GetComponent<FurnitureEditController>();
+            
+            if (currentEditController != null)
+            {
+                currentEditController.Initialize(furniture, backpackPanel);
+                currentEditController.OnConfirm = () => OnFurnitureEditConfirm(furniture);
+            }
+        }
+        
+        /// <summary>
+        /// 家具编辑确认
+        /// </summary>
+        private void OnFurnitureEditConfirm(FurnitureData furnitureData)
+        {
+            if (currentEditController == null) return;
+            
+            // 获取放置数据
+            var placedData = currentEditController.GetPlacedData();
+            if (placedData == null) return;
+            
+            // 创建正式的家具装饰物
+            PlaceFurniture(furnitureData, placedData);
+            
+            // 恢复玩家移动
+            if (player != null)
+            {
+                player.enabled = true;
+            }
+            
+            currentEditController = null;
+        }
+        
+        /// <summary>
+        /// 放置家具到场景中
+        /// </summary>
+        private void PlaceFurniture(FurnitureData furnitureData, PlacedFurnitureData placedData)
+        {
+            // 创建家具GameObject
+            var furnitureObj = new GameObject($"Furniture_{furnitureData.furnitureName}");
+            furnitureObj.transform.position = placedData.position;
+            furnitureObj.transform.localScale = Vector3.one * placedData.scale;
+            
+            // 如果有翻转
+            if (placedData.isFlipped)
+            {
+                Vector3 scale = furnitureObj.transform.localScale;
+                scale.x = -Mathf.Abs(scale.x);
+                furnitureObj.transform.localScale = scale;
+            }
+            
+            // 添加SpriteRenderer
+            var spriteRenderer = furnitureObj.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = furnitureData.furnitureSprite;
+            spriteRenderer.sortingLayerName = "Furniture";
+            spriteRenderer.sortingOrder = 10;
+            
+            // 添加HomeDecoration组件用于保存位置
+            var decoration = furnitureObj.AddComponent<HomeDecoration>();
+            decoration.decorationId = furnitureData.furnitureId;
+            decoration.canDrag = true;
+            
+            // 添加到列表
+            AddDecoration(decoration);
+            
+            // 保存位置
+            SaveDecorationPosition(decoration.decorationId, placedData.position);
+            
+            Debug.Log($"[HomeManager] 放置家具: {furnitureData.furnitureName} at {placedData.position}");
+        }
+        
+        /// <summary>
+        /// 取消家具编辑
+        /// </summary>
+        public void CancelFurnitureEdit()
+        {
+            if (currentEditController != null)
+            {
+                currentEditController.Cancel();
+                currentEditController = null;
+            }
+            
+            // 恢复玩家移动
+            if (player != null)
+            {
+                player.enabled = true;
+            }
+        }
+        
+        #region 装饰物编辑模式
+        
+        /// <summary>
+        /// 进入装饰物编辑模式
+        /// </summary>
+        public void EnterDecorationEditMode(HomeDecoration decoration)
+        {
+            if (currentEditingDecoration != null && currentEditingDecoration != decoration)
+            {
+                ExitDecorationEditMode();
+            }
+            
+            currentEditingDecoration = decoration;
+            decoration.EnterEditMode();
+            
+            // 显示编辑工具栏
+            ShowDecorationEditToolbar(decoration);
+            
+            // 暂停玩家移动
+            if (player != null)
+            {
+                player.enabled = false;
+            }
+        }
+        
+        /// <summary>
+        /// 退出装饰物编辑模式
+        /// </summary>
+        public void ExitDecorationEditMode()
+        {
+            if (currentEditingDecoration != null)
+            {
+                currentEditingDecoration.ExitEditMode();
+                currentEditingDecoration = null;
+            }
+            
+            // 隐藏编辑工具栏
+            HideDecorationEditToolbar();
+            
+            // 恢复玩家移动
+            if (player != null)
+            {
+                player.enabled = true;
+            }
+        }
+        
+        /// <summary>
+        /// 显示装饰物编辑工具栏
+        /// </summary>
+        private void ShowDecorationEditToolbar(HomeDecoration decoration)
+        {
+            // 创建工具栏
+            if (decorationEditToolbar == null)
+            {
+                CreateDecorationEditToolbar();
+            }
+            
+            if (decorationEditToolbar != null)
+            {
+                decorationEditToolbar.SetActive(true);
+                UpdateDecorationToolbarPosition(decoration);
+            }
+        }
+        
+        /// <summary>
+        /// 隐藏装饰物编辑工具栏
+        /// </summary>
+        private void HideDecorationEditToolbar()
+        {
+            if (decorationEditToolbar != null)
+            {
+                decorationEditToolbar.SetActive(false);
+            }
+        }
+        
+        /// <summary>
+        /// 创建装饰物编辑工具栏
+        /// </summary>
+        private void CreateDecorationEditToolbar()
+        {
+            // 创建画布
+            GameObject canvasObj = new GameObject("DecorationEditToolbarCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            canvasObj.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.transform.SetParent(transform);
+            
+            // 工具栏面板
+            decorationEditToolbar = new GameObject("ToolbarPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            decorationEditToolbar.transform.SetParent(canvasObj.transform);
+            
+            var rect = decorationEditToolbar.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(300, 60);
+            
+            decorationEditToolbar.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+            
+            // 水平布局
+            var layout = decorationEditToolbar.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(10, 10, 5, 5);
+            layout.spacing = 10;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            
+            // 翻转按钮
+            decoFlipBtn = CreateToolbarButton(decorationEditToolbar.transform, "翻转", new Color(0.4f, 0.6f, 1f));
+            decoFlipBtn.onClick.AddListener(OnDecorationFlip);
+            
+            // 缩放滑条
+            CreateDecorationScaleSlider(decorationEditToolbar.transform);
+            
+            // 确认按钮
+            decoConfirmBtn = CreateToolbarButton(decorationEditToolbar.transform, "确认", new Color(0.4f, 0.8f, 0.4f));
+            decoConfirmBtn.onClick.AddListener(OnDecorationConfirm);
+        }
+        
+        /// <summary>
+        /// 创建装饰物缩放滑条
+        /// </summary>
+        private void CreateDecorationScaleSlider(Transform parent)
+        {
+            GameObject container = new GameObject("ScaleSliderContainer", typeof(RectTransform));
+            container.transform.SetParent(parent);
+            var containerRect = container.GetComponent<RectTransform>();
+            containerRect.sizeDelta = new Vector2(100, 40);
+            
+            // 滑条
+            GameObject sliderObj = new GameObject("ScaleSlider", typeof(RectTransform), typeof(Slider));
+            sliderObj.transform.SetParent(container.transform);
+            var sliderRect = sliderObj.GetComponent<RectTransform>();
+            sliderRect.anchorMin = new Vector2(0, 0.5f);
+            sliderRect.anchorMax = new Vector2(1, 0.5f);
+            sliderRect.pivot = new Vector2(0.5f, 0.5f);
+            sliderRect.anchoredPosition = new Vector2(0, -5);
+            sliderRect.sizeDelta = new Vector2(-10, 15);
+            
+            decoScaleSlider = sliderObj.GetComponent<Slider>();
+            decoScaleSlider.minValue = 0.5f;
+            decoScaleSlider.maxValue = 2f;
+            decoScaleSlider.value = 1f;
+            decoScaleSlider.onValueChanged.AddListener(OnDecorationScaleChanged);
+            
+            // Background
+            GameObject bgObj = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            bgObj.transform.SetParent(sliderObj.transform);
+            var bgRect = bgObj.GetComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.offsetMin = Vector2.zero;
+            bgRect.offsetMax = Vector2.zero;
+            bgObj.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f);
+            
+            // Fill Area
+            GameObject fillAreaObj = new GameObject("Fill Area", typeof(RectTransform));
+            fillAreaObj.transform.SetParent(sliderObj.transform);
+            var fillAreaRect = fillAreaObj.GetComponent<RectTransform>();
+            fillAreaRect.anchorMin = Vector2.zero;
+            fillAreaRect.anchorMax = Vector2.one;
+            fillAreaRect.offsetMin = new Vector2(5, 0);
+            fillAreaRect.offsetMax = new Vector2(-5, 0);
+            
+            GameObject fillObj = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            fillObj.transform.SetParent(fillAreaObj.transform);
+            var fillRect = fillObj.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            fillObj.GetComponent<Image>().color = new Color(0.4f, 0.8f, 0.4f);
+            
+            // Handle Area
+            GameObject handleAreaObj = new GameObject("Handle Slide Area", typeof(RectTransform));
+            handleAreaObj.transform.SetParent(sliderObj.transform);
+            var handleAreaRect = handleAreaObj.GetComponent<RectTransform>();
+            handleAreaRect.anchorMin = Vector2.zero;
+            handleAreaRect.anchorMax = Vector2.one;
+            handleAreaRect.offsetMin = new Vector2(10, 0);
+            handleAreaRect.offsetMax = new Vector2(-10, 0);
+            
+            GameObject handleObj = new GameObject("Handle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            handleObj.transform.SetParent(handleAreaObj.transform);
+            handleObj.GetComponent<RectTransform>().sizeDelta = new Vector2(15, 25);
+            handleObj.GetComponent<Image>().color = Color.white;
+            
+            decoScaleSlider.fillRect = fillRect;
+            decoScaleSlider.handleRect = handleObj.GetComponent<RectTransform>();
+            decoScaleSlider.targetGraphic = handleObj.GetComponent<Image>();
+            
+            // 数值文本
+            GameObject valueObj = new GameObject("ScaleValue", typeof(RectTransform), typeof(Text));
+            valueObj.transform.SetParent(container.transform);
+            var valueRect = valueObj.GetComponent<RectTransform>();
+            valueRect.anchorMin = new Vector2(0, 1);
+            valueRect.anchorMax = new Vector2(1, 1);
+            valueRect.pivot = new Vector2(0.5f, 1);
+            valueRect.anchoredPosition = new Vector2(0, 0);
+            valueRect.sizeDelta = new Vector2(0, 15);
+            
+            decoScaleValueText = valueObj.GetComponent<Text>();
+            decoScaleValueText.text = "1.0x";
+            decoScaleValueText.fontSize = 12;
+            decoScaleValueText.alignment = TextAnchor.MiddleCenter;
+            decoScaleValueText.color = Color.white;
+        }
+        
+        /// <summary>
+        /// 装饰物缩放改变
+        /// </summary>
+        private void OnDecorationScaleChanged(float value)
+        {
+            if (currentEditingDecoration != null)
+            {
+                currentEditingDecoration.SetScale(value);
+            }
+            if (decoScaleValueText != null)
+            {
+                decoScaleValueText.text = $"{value:F1}x";
+            }
+        }
+        
+        /// <summary>
+        /// 更新工具栏位置（跟随装饰物）
+        /// </summary>
+        private void UpdateDecorationToolbarPosition(HomeDecoration decoration)
+        {
+            if (decorationEditToolbar == null || decoration == null) return;
+            
+            // 将装饰物世界坐标转换为屏幕坐标
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(decoration.transform.position);
+            screenPos.y += 80f; // 在装饰物上方
+            
+            // 限制在屏幕内
+            screenPos.x = Mathf.Clamp(screenPos.x, 150, Screen.width - 150);
+            screenPos.y = Mathf.Clamp(screenPos.y, 50, Screen.height - 50);
+            
+            decorationEditToolbar.transform.position = screenPos;
+        }
+        
+        private void Update()
+        {
+            // 更新工具栏位置
+            if (currentEditingDecoration != null && decorationEditToolbar != null && decorationEditToolbar.activeInHierarchy)
+            {
+                UpdateDecorationToolbarPosition(currentEditingDecoration);
+            }
+        }
+        
+        /// <summary>
+        /// 翻转按钮点击
+        /// </summary>
+        private void OnDecorationFlip()
+        {
+            if (currentEditingDecoration != null)
+            {
+                currentEditingDecoration.Flip();
+            }
+        }
+        
+        /// <summary>
+        /// 确认按钮点击
+        /// </summary>
+        private void OnDecorationConfirm()
+        {
+            if (currentEditingDecoration != null)
+            {
+                currentEditingDecoration.ConfirmEdit();
+            }
+            ExitDecorationEditMode();
+        }
+        
+        /// <summary>
+        /// 检查装饰物编辑工具栏是否激活
+        /// </summary>
+        public bool IsDecorationEditToolbarActive()
+        {
+            return decorationEditToolbar != null && decorationEditToolbar.activeInHierarchy;
+        }
+        
+        /// <summary>
+        /// 创建工具栏按钮
+        /// </summary>
+        private UnityEngine.UI.Button CreateToolbarButton(Transform parent, string text, Color color)
+        {
+            GameObject btnObj = new GameObject($"{text}Btn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(UnityEngine.UI.Button));
+            btnObj.transform.SetParent(parent);
+            
+            var rect = btnObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(80, 40);
+            
+            btnObj.GetComponent<Image>().color = color;
+            
+            // 文本
+            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
+            textObj.transform.SetParent(btnObj.transform);
+            var textRect = textObj.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(5, 5);
+            textRect.offsetMax = new Vector2(-5, -5);
+            
+            var txt = textObj.GetComponent<Text>();
+            txt.text = text;
+            txt.fontSize = 18;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = Color.white;
+            
+            return btnObj.GetComponent<UnityEngine.UI.Button>();
+        }
+        
+        #endregion
     }
 }
