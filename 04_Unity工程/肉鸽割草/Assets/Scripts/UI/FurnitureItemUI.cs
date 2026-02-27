@@ -17,6 +17,9 @@ namespace FluffyGeometry.UI
         [Tooltip("家具名称")]
         public Text furnitureNameText;
         
+        [Tooltip("数量文本")]
+        public Text countText;
+        
         [Tooltip("选中态边框")]
         public GameObject selectedBorder;
         
@@ -67,6 +70,9 @@ namespace FluffyGeometry.UI
                 furnitureNameText.text = data.furnitureName;
             }
             
+            // 更新数量和按钮状态
+            UpdateCountDisplay();
+            
             // 隐藏装饰按钮和选中态
             SetSelected(false);
             if (decorateBtn != null)
@@ -79,11 +85,66 @@ namespace FluffyGeometry.UI
             {
                 decorateBtn.onClick.RemoveAllListeners();
                 decorateBtn.onClick.AddListener(OnDecorateClick);
+            }
+        }
+        
+        /// <summary>
+        /// 更新数量显示和按钮状态
+        /// </summary>
+        public void UpdateCountDisplay()
+        {
+            if (furnitureData == null) return;
+            
+            // 确保 FurnitureInventory 实例存在
+            if (FurnitureInventory.Instance == null)
+            {
+                Debug.LogWarning($"[FurnitureItemUI] FurnitureInventory.Instance 为 null，尝试查找...");
+                FindObjectOfType<FurnitureInventory>();
+            }
+            
+            int totalCount = 0;
+            int placedCount = 0;
+            int availableCount = 0;
+            
+            if (FurnitureInventory.Instance != null)
+            {
+                totalCount = FurnitureInventory.Instance.GetTotalCount(furnitureData.furnitureId);
+                placedCount = FurnitureInventory.Instance.GetPlacedCount(furnitureData.furnitureId);
+                availableCount = FurnitureInventory.Instance.GetAvailableCount(furnitureData.furnitureId);
+            }
+            
+            Debug.Log($"[FurnitureItemUI] {furnitureData.furnitureId}: 总计={totalCount}, 已放置={placedCount}, 可用={availableCount}");
+            
+            // 更新数量文本
+            if (countText != null)
+            {
+                countText.text = $"x{availableCount}";
+                countText.gameObject.SetActive(availableCount > 0);
+            }
+            
+            // 更新按钮状态
+            bool canPlace = availableCount > 0;
+            if (decorateBtn != null)
+            {
+                decorateBtn.interactable = canPlace;
                 
-                if (decorateBtnText != null)
+                // 更新按钮颜色和文本
+                var colors = decorateBtn.colors;
+                if (canPlace)
                 {
-                    decorateBtnText.text = "装饰";
+                    colors.normalColor = new Color(0.4f, 0.8f, 0.4f); // 绿色
+                    colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
                 }
+                else
+                {
+                    colors.normalColor = new Color(0.5f, 0.5f, 0.5f); // 灰色
+                }
+                decorateBtn.colors = colors;
+            }
+            
+            if (decorateBtnText != null)
+            {
+                decorateBtnText.text = canPlace ? "装饰" : "数量不足";
             }
         }
         
@@ -109,10 +170,14 @@ namespace FluffyGeometry.UI
                 selectedBorder.SetActive(selected);
             }
             
-            // 显示/隐藏装饰按钮
+            // 显示/隐藏装饰按钮，并更新数量状态
             if (decorateBtn != null)
             {
                 decorateBtn.gameObject.SetActive(selected);
+                if (selected)
+                {
+                    UpdateCountDisplay();
+                }
             }
         }
         

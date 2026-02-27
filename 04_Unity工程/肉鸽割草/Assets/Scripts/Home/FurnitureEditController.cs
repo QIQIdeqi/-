@@ -62,6 +62,11 @@ namespace FluffyGeometry.Home
         // 背包面板引用（用于回调）
         private FluffyGeometry.UI.BackpackPanel backpackPanel;
         
+        /// <summary>
+        /// 获取背包面板引用
+        /// </summary>
+        public FluffyGeometry.UI.BackpackPanel BackpackPanel => backpackPanel;
+        
         // 相机
         private Camera mainCamera;
         

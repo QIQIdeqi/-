@@ -5,7 +5,7 @@ namespace GeometryWarrior
     /// <summary>
     /// 装扮部件数据 - 可装备的装饰部件（蝴蝶结、帽子等）
     /// </summary>
-    [CreateAssetMenu(fileName = "NewOutfitPart", menuName = "Geometry Warrior/Outfit Part")]
+    [CreateAssetMenu(fileName = "NewOutfitPart", menuName = "绒毛几何物语/装扮部件数据")]
     public class OutfitPartData : ScriptableObject
     {
         [Header("【基本信息】")]

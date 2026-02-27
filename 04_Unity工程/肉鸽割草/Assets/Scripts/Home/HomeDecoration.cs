@@ -243,7 +243,9 @@ namespace GeometryWarrior
         public void SetScale(float scale)
         {
             Vector3 currentScale = transform.localScale;
-            currentScale.x = Mathf.Abs(currentScale.x) * (currentScale.x < 0 ? -1 : 1) * scale;
+            // 保留翻转符号，直接设置新的绝对缩放值
+            bool isFlipped = currentScale.x < 0;
+            currentScale.x = scale * (isFlipped ? -1 : 1);
             currentScale.y = scale;
             transform.localScale = currentScale;
         }
@@ -279,13 +281,7 @@ namespace GeometryWarrior
         /// </summary>
         private bool IsPointerOverUI()
         {
-            // 检查编辑工具栏
-            if (HomeManager.Instance != null && HomeManager.Instance.IsDecorationEditToolbarActive())
-            {
-                return true;
-            }
-            
-            // 使用EventSystem检查
+            // 使用EventSystem检查是否点击在UI上
             if (UnityEngine.EventSystems.EventSystem.current != null)
             {
                 return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
@@ -302,6 +298,8 @@ namespace GeometryWarrior
             if (HomeManager.Instance != null)
             {
                 HomeManager.Instance.SaveDecorationPosition(decorationId, transform.position);
+                // 同时保存所有家具数据（因为可能修改了缩放或位置）
+                HomeManager.Instance.SaveAllFurnitureData();
             }
         }
         

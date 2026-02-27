@@ -52,6 +52,7 @@ namespace GeometryWarrior
         private FluffyGeometry.UI.BackpackButton backpackButton;
         private FurnitureEditController currentEditController;
         private const string DECORATION_SAVE_KEY = "HomeDecorations";
+        private const string PLACED_FURNITURE_SAVE_KEY = "PlacedFurnitureData";
         
         // 装饰物编辑
         private HomeDecoration currentEditingDecoration;
@@ -76,11 +77,71 @@ namespace GeometryWarrior
             // 生成玩家
             SpawnPlayer();
             
-            // 加载装饰物位置
+            // 加载装饰物位置（场景预置的）
             LoadDecorationPositions();
+            
+            // 加载并重新生成已放置的家具（从背包摆放的）
+            LoadAndSpawnPlacedFurniture();
+            
+            // 同步场景中的初始装饰物到库存系统（标记为已放置）
+            SyncInitialDecorationsToInventory();
             
             // 创建背包按钮
             CreateBackpackButton();
+        }
+        
+        /// <summary>
+        /// 同步场景中的初始装饰物到库存系统
+        /// 根据场景中实际存在的家具数量，修正 placedCounts
+        /// </summary>
+        private void SyncInitialDecorationsToInventory()
+        {
+            if (FurnitureInventory.Instance == null) return;
+            
+            // 统计场景中实际存在的每种家具数量
+            Dictionary<string, int> actualCounts = new Dictionary<string, int>();
+            foreach (var decoration in decorations)
+            {
+                if (decoration == null) continue;
+                
+                if (actualCounts.ContainsKey(decoration.decorationId))
+                {
+                    actualCounts[decoration.decorationId]++;
+                }
+                else
+                {
+                    actualCounts[decoration.decorationId] = 1;
+                }
+            }
+            
+            // 获取所有可能有 placed count 的家具ID
+            HashSet<string> allIds = new HashSet<string>(FurnitureInventory.Instance.GetAllFurnitureIds());
+            foreach (var id in actualCounts.Keys)
+            {
+                allIds.Add(id);
+            }
+            
+            // 修正 placedCounts
+            foreach (var furnitureId in allIds)
+            {
+                int actualCount = actualCounts.ContainsKey(furnitureId) ? actualCounts[furnitureId] : 0;
+                int savedPlacedCount = FurnitureInventory.Instance.GetPlacedCount(furnitureId);
+                int totalCount = FurnitureInventory.Instance.GetTotalCount(furnitureId);
+                
+                // 如果场景中实际数量与 placed count 不一致，进行修正
+                if (actualCount != savedPlacedCount)
+                {
+                    Debug.Log($"[HomeManager] 修正 placed count: {furnitureId} {savedPlacedCount} -> {actualCount} (场景中实际数量)");
+                    FurnitureInventory.Instance.SetPlacedCount(furnitureId, actualCount);
+                }
+                
+                // 如果总数量小于实际数量，增加总数量（这种情况不应该发生，但做保护）
+                if (totalCount < actualCount)
+                {
+                    Debug.Log($"[HomeManager] 修正 total count: {furnitureId} {totalCount} -> {actualCount}");
+                    FurnitureInventory.Instance.SetFurnitureCount(furnitureId, actualCount);
+                }
+            }
         }
         
         /// <summary>
@@ -162,7 +223,7 @@ namespace GeometryWarrior
         }
         
         /// <summary>
-        /// 保存装饰物位置
+        /// 保存装饰物位置（用于场景中预置的装饰物）
         /// </summary>
         public void SaveDecorationPosition(string decorationId, Vector3 position)
         {
@@ -175,7 +236,7 @@ namespace GeometryWarrior
         }
         
         /// <summary>
-        /// 加载装饰物位置
+        /// 加载装饰物位置（用于场景中预置的装饰物）
         /// </summary>
         private void LoadDecorationPositions()
         {
@@ -206,6 +267,129 @@ namespace GeometryWarrior
         }
         
         /// <summary>
+        /// 保存已放置的家具数据（从背包动态摆放的）
+        /// </summary>
+        private void SavePlacedFurniture()
+        {
+            List<string> saveData = new List<string>();
+            
+            foreach (var deco in decorations)
+            {
+                if (deco == null) continue;
+                
+                // 跳过场景中预置的装饰物（通过检查是否是运行时创建的）
+                // 这里简单处理：保存所有装饰物的完整数据
+                string data = $"{deco.decorationId},{deco.transform.position.x},{deco.transform.position.y},{deco.transform.position.z},{deco.transform.localScale.x},{deco.transform.localScale.y},{deco.GetComponent<SpriteRenderer>()?.sortingOrder ?? 10}";
+                saveData.Add(data);
+            }
+            
+            PlayerPrefs.SetString(PLACED_FURNITURE_SAVE_KEY, string.Join("|", saveData));
+            PlayerPrefs.Save();
+            
+            Debug.Log($"[HomeManager] 保存已放置家具: {saveData.Count} 个");
+        }
+        
+        /// <summary>
+        /// 加载并重新生成已放置的家具
+        /// </summary>
+        private void LoadAndSpawnPlacedFurniture()
+        {
+            string savedData = PlayerPrefs.GetString(PLACED_FURNITURE_SAVE_KEY, "");
+            if (string.IsNullOrEmpty(savedData)) return;
+            
+            string[] entries = savedData.Split('|');
+            
+            foreach (var entry in entries)
+            {
+                string[] parts = entry.Split(',');
+                if (parts.Length >= 7)
+                {
+                    string furnitureId = parts[0];
+                    
+                    // 检查是否已经在场景中存在（避免重复创建）
+                    bool alreadyExists = false;
+                    foreach (var existing in decorations)
+                    {
+                        if (existing != null && existing.decorationId == furnitureId)
+                        {
+                            alreadyExists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (alreadyExists) continue;
+                    
+                    // 解析位置和缩放
+                    if (float.TryParse(parts[1], out float px) &&
+                        float.TryParse(parts[2], out float py) &&
+                        float.TryParse(parts[3], out float pz) &&
+                        float.TryParse(parts[4], out float sx) &&
+                        float.TryParse(parts[5], out float sy) &&
+                        int.TryParse(parts[6], out int sortOrder))
+                    {
+                        // 从Resources加载家具数据
+                        var furnitureData = Resources.Load<FurnitureData>($"Furniture/{furnitureId}");
+                        if (furnitureData == null)
+                        {
+                            // 尝试直接加载
+                            var allFurniture = Resources.LoadAll<FurnitureData>("Furniture");
+                            foreach (var f in allFurniture)
+                            {
+                                if (f.furnitureId == furnitureId)
+                                {
+                                    furnitureData = f;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (furnitureData != null)
+                        {
+                            // 重新创建家具
+                            SpawnSavedFurniture(furnitureData, new Vector3(px, py, pz), new Vector3(sx, sy, 1), sortOrder);
+                        }
+                    }
+                }
+            }
+            
+            Debug.Log($"[HomeManager] 加载已放置家具: {entries.Length} 个");
+        }
+        
+        /// <summary>
+        /// 保存所有家具数据（公共接口供 HomeDecoration 调用）
+        /// </summary>
+        public void SaveAllFurnitureData()
+        {
+            SavePlacedFurniture();
+        }
+        
+        /// <summary>
+        /// 重新生成保存的家具
+        /// </summary>
+        private void SpawnSavedFurniture(FurnitureData furnitureData, Vector3 position, Vector3 scale, int sortOrder)
+        {
+            var furnitureObj = new GameObject($"Furniture_{furnitureData.furnitureName}");
+            furnitureObj.transform.position = position;
+            furnitureObj.transform.localScale = scale;
+            
+            // 添加SpriteRenderer
+            var spriteRenderer = furnitureObj.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = furnitureData.furnitureSprite;
+            spriteRenderer.sortingLayerName = "Furniture";
+            spriteRenderer.sortingOrder = sortOrder;
+            
+            // 添加HomeDecoration组件
+            var decoration = furnitureObj.AddComponent<HomeDecoration>();
+            decoration.decorationId = furnitureData.furnitureId;
+            decoration.canDrag = true;
+            
+            // 添加到列表
+            AddDecoration(decoration);
+            
+            Debug.Log($"[HomeManager] 重新生成家具: {furnitureData.furnitureName} at {position}");
+        }
+        
+        /// <summary>
         /// 添加新的装饰物
         /// </summary>
         public void AddDecoration(HomeDecoration decoration)
@@ -222,6 +406,33 @@ namespace GeometryWarrior
         public void RemoveDecoration(HomeDecoration decoration)
         {
             decorations.Remove(decoration);
+        }
+        
+        /// <summary>
+        /// 清除所有家具（从场景中删除）
+        /// </summary>
+        public void ClearAllFurniture()
+        {
+            Debug.Log($"[HomeManager] 清除所有家具，共 {decorations.Count} 个");
+            
+            // 复制列表避免遍历时修改
+            List<HomeDecoration> toRemove = new List<HomeDecoration>(decorations);
+            
+            foreach (var decoration in toRemove)
+            {
+                if (decoration != null && decoration.gameObject != null)
+                {
+                    Destroy(decoration.gameObject);
+                }
+            }
+            
+            decorations.Clear();
+            
+            // 同时清除保存的家具数据
+            PlayerPrefs.DeleteKey(PLACED_FURNITURE_SAVE_KEY);
+            PlayerPrefs.Save();
+            
+            Debug.Log("[HomeManager] 所有家具已清除");
         }
         
         /// <summary>
@@ -259,7 +470,7 @@ namespace GeometryWarrior
             var placedData = currentEditController.GetPlacedData();
             if (placedData == null) return;
             
-            // 创建正式的家具装饰物
+            // 创建正式的家具装饰物（内部会扣减库存）
             PlaceFurniture(furnitureData, placedData);
             
             // 恢复玩家移动
@@ -267,6 +478,9 @@ namespace GeometryWarrior
             {
                 player.enabled = true;
             }
+            
+            // 注意：背包面板会在 FurnitureEditController 中自动重新打开
+            // 重新打开时会刷新列表，数量显示会自动更新
             
             currentEditController = null;
         }
@@ -276,6 +490,16 @@ namespace GeometryWarrior
         /// </summary>
         private void PlaceFurniture(FurnitureData furnitureData, PlacedFurnitureData placedData)
         {
+            // 检查是否可以放置（有可用数量）
+            if (FurnitureInventory.Instance != null)
+            {
+                if (!FurnitureInventory.Instance.CanPlace(furnitureData.furnitureId))
+                {
+                    Debug.LogWarning($"[HomeManager] 家具数量不足，无法放置: {furnitureData.furnitureName}");
+                    return;
+                }
+            }
+            
             // 创建家具GameObject
             var furnitureObj = new GameObject($"Furniture_{furnitureData.furnitureName}");
             furnitureObj.transform.position = placedData.position;
@@ -305,6 +529,15 @@ namespace GeometryWarrior
             
             // 保存位置
             SaveDecorationPosition(decoration.decorationId, placedData.position);
+            
+            // 扣减库存数量
+            if (FurnitureInventory.Instance != null)
+            {
+                FurnitureInventory.Instance.OnFurniturePlaced(furnitureData.furnitureId);
+            }
+            
+            // 保存所有已放置家具（用于下次场景加载时重新生成）
+            SavePlacedFurniture();
             
             Debug.Log($"[HomeManager] 放置家具: {furnitureData.furnitureName} at {placedData.position}");
         }
@@ -526,6 +759,7 @@ namespace GeometryWarrior
             
             decoScaleValueText = valueObj.GetComponent<Text>();
             decoScaleValueText.text = "1.0x";
+            decoScaleValueText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             decoScaleValueText.fontSize = 12;
             decoScaleValueText.alignment = TextAnchor.MiddleCenter;
             decoScaleValueText.color = Color.white;
@@ -628,6 +862,7 @@ namespace GeometryWarrior
             
             var txt = textObj.GetComponent<Text>();
             txt.text = text;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             txt.fontSize = 18;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = Color.white;

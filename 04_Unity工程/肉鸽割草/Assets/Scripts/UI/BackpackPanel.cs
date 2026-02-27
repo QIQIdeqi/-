@@ -104,7 +104,22 @@ namespace FluffyGeometry.UI
                 furnitureScrollRect = furnitureContent.GetComponentInParent<ScrollRect>();
             }
             
-            // 加载数据
+            // 延迟加载数据，确保 OutfitManager 已初始化
+            StartCoroutine(DelayedLoadData());
+        }
+        
+        private System.Collections.IEnumerator DelayedLoadData()
+        {
+            // 等待一帧，确保 OutfitManager 已初始化
+            yield return null;
+            
+            // 再等待一帧，确保所有单例都已就绪
+            if (OutfitManager.Instance == null)
+            {
+                Debug.Log("[BackpackPanel] 等待 OutfitManager 初始化...");
+                yield return new WaitForSeconds(0.1f);
+            }
+            
             LoadData();
         }
         
@@ -130,12 +145,64 @@ namespace FluffyGeometry.UI
         public void Show(int tabIndex = 0)
         {
             gameObject.SetActive(true);
+            
+            // 先切换Tab显示基础UI
             SwitchTab(tabIndex);
             
             // 恢复家具列表滚动位置
             if (tabIndex == 1 && furnitureScrollRect != null)
             {
                 furnitureScrollRect.normalizedPosition = furnitureScrollPos;
+            }
+            
+            // 延迟刷新家具数量显示，确保 FurnitureInventory 已初始化
+            if (tabIndex == 1)
+            {
+                StartCoroutine(DelayedRefreshFurnitureCounts());
+            }
+            
+            // 如果是主角装扮Tab，延迟刷新列表确保数据已加载
+            if (tabIndex == 0)
+            {
+                StartCoroutine(DelayedRefreshOutfitList());
+            }
+        }
+        
+        /// <summary>
+        /// 延迟刷新装扮列表
+        /// </summary>
+        private System.Collections.IEnumerator DelayedRefreshOutfitList()
+        {
+            // 等待数据加载完成
+            int attempts = 0;
+            while ((allOutfitParts == null || allOutfitParts.Count == 0) && attempts < 10)
+            {
+                yield return new WaitForSeconds(0.05f);
+                attempts++;
+                
+                // 尝试重新加载数据
+                if (OutfitManager.Instance != null)
+                {
+                    allOutfitParts = OutfitManager.Instance.GetAllParts();
+                }
+            }
+            
+            Debug.Log($"[BackpackPanel] 延迟刷新装扮列表，数据数量: {allOutfitParts?.Count ?? 0}");
+            RefreshOutfitList();
+        }
+        
+        /// <summary>
+        /// 延迟刷新家具数量
+        /// </summary>
+        private System.Collections.IEnumerator DelayedRefreshFurnitureCounts()
+        {
+            // 等待一帧，确保 FurnitureInventory 已初始化
+            yield return null;
+            
+            // 刷新所有家具项的数量显示
+            foreach (var item in furnitureItems)
+            {
+                item.UpdateCountDisplay();
             }
         }
         
@@ -222,10 +289,17 @@ namespace FluffyGeometry.UI
         /// </summary>
         private void LoadData()
         {
+            Debug.Log("[BackpackPanel] LoadData 开始");
+            
             // 从OutfitManager加载装扮数据
             if (OutfitManager.Instance != null)
             {
                 allOutfitParts = OutfitManager.Instance.GetAllParts();
+                Debug.Log($"[BackpackPanel] 从 OutfitManager 获取到 {allOutfitParts?.Count ?? 0} 个装扮部件");
+            }
+            else
+            {
+                Debug.LogError("[BackpackPanel] OutfitManager.Instance 为 null！");
             }
             
             // 从HomeManager或数据管理器加载家具数据
@@ -237,17 +311,30 @@ namespace FluffyGeometry.UI
         /// </summary>
         private void LoadFurnitureData()
         {
-            // TODO: 从存档或数据管理器加载
-            // 这里先使用示例数据
             allFurniture = new List<FurnitureData>();
             
-            // 可以从Resources加载所有FurnitureData
+            // 从Resources加载所有FurnitureData
             var furnitureArray = Resources.LoadAll<FurnitureData>("Furniture");
             foreach (var furniture in furnitureArray)
             {
                 if (furniture.isUnlocked)
                 {
                     allFurniture.Add(furniture);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 刷新特定家具的显示（摆放后调用）
+        /// </summary>
+        public void RefreshFurnitureItem(FurnitureData furniture)
+        {
+            foreach (var item in furnitureItems)
+            {
+                if (item.furnitureData == furniture)
+                {
+                    item.UpdateCountDisplay();
+                    break;
                 }
             }
         }
@@ -264,17 +351,85 @@ namespace FluffyGeometry.UI
             }
             outfitItems.Clear();
             
-            if (outfitItemPrefab == null || outfitListContainer == null) return;
+            Debug.Log($"[BackpackPanel] RefreshOutfitList 开始 - outfitItemPrefab={outfitItemPrefab != null}, outfitListContainer={outfitListContainer != null}");
+            
+            if (outfitItemPrefab == null || outfitListContainer == null)
+            {
+                Debug.LogError("[BackpackPanel] outfitItemPrefab 或 outfitListContainer 未设置！请在BackpackPanel预制体上配置这些字段。");
+                return;
+            }
+            
+            // 检查是否有数据
+            if (allOutfitParts == null || allOutfitParts.Count == 0)
+            {
+                Debug.LogWarning("[BackpackPanel] 没有装扮部件数据！请检查：\n1. Resources/OutfitParts 文件夹是否存在部件文件\n2. OutfitManager 是否正确加载");
+                ShowEmptyOutfitMessage();
+                return;
+            }
+            
+            Debug.Log($"[BackpackPanel] 找到 {allOutfitParts.Count} 个部件数据");
             
             // 创建新项
+            int nullCount = 0;
+            int validCount = 0;
+            
             foreach (var partData in allOutfitParts)
             {
-                var item = Instantiate(outfitItemPrefab, outfitListContainer);
-                bool isUnlocked = OutfitManager.Instance != null && OutfitManager.Instance.IsPartUnlocked(partData);
-                bool isEquipped = OutfitManager.Instance != null && OutfitManager.Instance.GetEquippedPart(partData.category) == partData;
-                item.Setup(partData, isUnlocked, isEquipped, OnOutfitItemClick);
-                outfitItems.Add(item);
+                if (partData == null)
+                {
+                    nullCount++;
+                    continue;
+                }
+                
+                validCount++;
+                Debug.Log($"[BackpackPanel] 创建部件UI: {partData.partName} ({partData.partId})");
+                
+                try
+                {
+                    var item = Instantiate(outfitItemPrefab, outfitListContainer);
+                    if (item == null)
+                    {
+                        Debug.LogError("[BackpackPanel] Instantiate outfitItemPrefab 返回 null");
+                        continue;
+                    }
+                    
+                    bool isUnlocked = OutfitManager.Instance != null && OutfitManager.Instance.IsPartUnlocked(partData);
+                    bool isEquipped = OutfitManager.Instance != null && OutfitManager.Instance.GetEquippedPart(partData.category) == partData;
+                    item.Setup(partData, isUnlocked, isEquipped, OnOutfitItemClick);
+                    outfitItems.Add(item);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[BackpackPanel] 创建部件UI时出错: {e.Message}");
+                }
             }
+            
+            if (nullCount > 0)
+            {
+                Debug.LogWarning($"[BackpackPanel] 跳过了 {nullCount} 个 null 部件，成功创建 {validCount} 个");
+            }
+            
+            Debug.Log($"[BackpackPanel] 刷新了 {outfitItems.Count} 个装扮部件");
+        }
+        
+        /// <summary>
+        /// 显示空状态提示
+        /// </summary>
+        private void ShowEmptyOutfitMessage()
+        {
+            // 创建提示文本
+            GameObject msgObj = new GameObject("EmptyMessage", typeof(RectTransform), typeof(UnityEngine.UI.Text));
+            msgObj.transform.SetParent(outfitListContainer, false);
+            
+            var rect = msgObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(400, 100);
+            
+            var text = msgObj.GetComponent<UnityEngine.UI.Text>();
+            text.text = "还没有装扮部件~\n\n请使用菜单：\n绒毛几何物语 → 快速创建 → 装扮部件";
+            text.fontSize = 18;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = new Color(0.7f, 0.7f, 0.7f);
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
         
         /// <summary>

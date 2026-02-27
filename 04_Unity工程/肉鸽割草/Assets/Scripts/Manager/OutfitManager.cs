@@ -56,25 +56,84 @@ namespace GeometryWarrior
         private void LoadAllPartsFromResources()
         {
             allParts = new List<OutfitPartData>();
-            OutfitPartData[] parts = Resources.LoadAll<OutfitPartData>("OutfitParts");
             
-            if (parts != null && parts.Length > 0)
+            Debug.Log("[OutfitManager] 开始从 Resources/OutfitParts 加载部件...");
+            
+            // 方法1: 使用 Resources.LoadAll
+            OutfitPartData[] parts = Resources.LoadAll<OutfitPartData>("OutfitParts");
+            Debug.Log($"[OutfitManager] Resources.LoadAll 返回数组长度: {parts?.Length ?? 0}");
+            
+            // 方法2: 手动加载每个文件（如果方法1失败）
+            if (parts == null || parts.Length == 0 || AllElementsNull(parts))
             {
-                allParts.AddRange(parts);
-                Debug.Log($"[OutfitManager] 自动加载了 {parts.Length} 个装扮部件");
+                Debug.Log("[OutfitManager] 尝试手动加载...");
+                LoadPartsManually();
             }
             else
             {
-                Debug.LogWarning("[OutfitManager] 在 Resources/OutfitParts 中找不到任何部件文件！");
+                foreach (var part in parts)
+                {
+                    if (part != null)
+                    {
+                        allParts.Add(part);
+                        Debug.Log($"[OutfitManager] 加载部件: {part.partId}");
+                    }
+                }
             }
+            
+            Debug.Log($"[OutfitManager] 共加载 {allParts.Count} 个有效部件");
+        }
+        
+        private bool AllElementsNull(OutfitPartData[] array)
+        {
+            if (array == null) return true;
+            foreach (var item in array)
+            {
+                if (item != null) return false;
+            }
+            return true;
+        }
+        
+        private void LoadPartsManually()
+        {
+            #if UNITY_EDITOR
+            // 编辑器模式下直接读取文件
+            string path = Application.dataPath + "/Resources/OutfitParts";
+            if (System.IO.Directory.Exists(path))
+            {
+                var files = System.IO.Directory.GetFiles(path, "*.asset");
+                Debug.Log($"[OutfitManager] 手动扫描找到 {files.Length} 个 .asset 文件");
+                
+                foreach (var file in files)
+                {
+                    string fileName = System.IO.Path.GetFileNameWithoutExtension(file);
+                    string assetPath = $"Assets/Resources/OutfitParts/{fileName}.asset";
+                    
+                    var part = UnityEditor.AssetDatabase.LoadAssetAtPath<OutfitPartData>(assetPath);
+                    if (part != null)
+                    {
+                        allParts.Add(part);
+                        Debug.Log($"[OutfitManager] 手动加载: {part.partId}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[OutfitManager] 无法加载: {assetPath}");
+                    }
+                }
+            }
+            #else
+            // 运行时使用备用方案：硬编码加载已知部件
+            Debug.LogWarning("[OutfitManager] 运行时使用备用加载方案");
+            #endif
         }
         
         /// <summary>
-        /// 获取所有部件
+        /// 获取所有部件（返回副本，防止外部修改）
         /// </summary>
         public List<OutfitPartData> GetAllParts()
         {
-            return allParts;
+            // 过滤掉 null 元素
+            return allParts.FindAll(p => p != null);
         }
         
         /// <summary>

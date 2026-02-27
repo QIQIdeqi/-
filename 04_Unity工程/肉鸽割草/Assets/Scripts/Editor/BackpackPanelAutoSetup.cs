@@ -1,288 +1,335 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEditor;
+using FluffyGeometry.UI;
 
-namespace FluffyGeometry.UI
+namespace GeometryWarrior.Editor
 {
     /// <summary>
-    /// 背包面板预制体自动配置工具
-    /// 将此脚本挂载在空物体上，点击"自动配置"即可生成完整背包面板
+    /// BackpackPanel 自动配置工具 - 快速设置缺失的引用
     /// </summary>
-    public class BackpackPanelAutoSetup : MonoBehaviour
+    public class BackpackPanelAutoSetup : EditorWindow
     {
-        [Header("【自动配置设置】")]
-        [Tooltip("点击此按钮自动生成背包面板预制体")]
-        public bool autoSetup = false;
-        
-        private void OnValidate()
+        [MenuItem("绒毛几何物语/自动配置/BackpackPanel")]
+        public static void ShowWindow()
         {
-            if (autoSetup)
+            GetWindow<BackpackPanelAutoSetup>("配置 BackpackPanel");
+        }
+        
+        private void OnGUI()
+        {
+            GUILayout.Label("✦ BackpackPanel 自动配置 ✦", EditorStyles.boldLabel);
+            GUILayout.Space(10);
+            
+            EditorGUILayout.HelpBox(
+                "此工具会自动为 BackpackPanel 配置缺失的字段：\n" +
+                "• 主角装扮列表容器\n" +
+                "• 家园装扮列表容器\n" +
+                "• 部件项预制体\n" +
+                "• 家具项预制体", 
+                MessageType.Info);
+            
+            GUILayout.Space(10);
+            
+            GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
+            if (GUILayout.Button("自动配置选中的 BackpackPanel", GUILayout.Height(40)))
             {
-                autoSetup = false;
-                SetupBackpackPanel();
+                SetupSelectedBackpackPanel();
+            }
+            GUI.backgroundColor = Color.white;
+            
+            GUILayout.Space(10);
+            
+            if (GUILayout.Button("查找场景中的 BackpackPanel"))
+            {
+                FindBackpackPanelInScene();
+            }
+            
+            GUILayout.Space(20);
+            
+            // 显示当前选中对象信息
+            EditorGUILayout.LabelField("当前选中:", Selection.activeGameObject?.name ?? "无");
+        }
+        
+        private void SetupSelectedBackpackPanel()
+        {
+            GameObject selected = Selection.activeGameObject;
+            if (selected == null)
+            {
+                EditorUtility.DisplayDialog("错误", "请先选中 BackpackPanel 游戏对象！", "确定");
+                return;
+            }
+            
+            BackpackPanel panel = selected.GetComponent<BackpackPanel>();
+            if (panel == null)
+            {
+                EditorUtility.DisplayDialog("错误", "选中的对象没有 BackpackPanel 组件！", "确定");
+                return;
+            }
+            
+            Undo.RecordObject(panel, "Setup BackpackPanel");
+            
+            // 通过 SerializedObject 设置字段
+            SerializedObject serializedObj = new SerializedObject(panel);
+            
+            // 1. 设置 outfitListContainer (CharacterContent 或其子对象)
+            Transform characterContent = FindOrCreateChild(selected.transform, "CharacterContent");
+            if (characterContent != null)
+            {
+                // 查找或创建 ScrollView -> Viewport -> Content
+                Transform scrollView = FindOrCreateChild(characterContent, "ScrollView");
+                Transform viewport = FindOrCreateChild(scrollView, "Viewport");
+                Transform content = FindOrCreateChild(viewport, "Content");
+                
+                serializedObj.FindProperty("outfitListContainer").objectReferenceValue = content;
+                
+                // 添加必要的布局组件
+                SetupContentLayout(content);
+            }
+            
+            // 2. 设置 furnitureListContainer (FurnitureContent 或其子对象)
+            Transform furnitureContent = FindOrCreateChild(selected.transform, "FurnitureContent");
+            if (furnitureContent != null)
+            {
+                Transform scrollView = FindOrCreateChild(furnitureContent, "ScrollView");
+                Transform viewport = FindOrCreateChild(scrollView, "Viewport");
+                Transform content = FindOrCreateChild(viewport, "Content");
+                
+                serializedObj.FindProperty("furnitureListContainer").objectReferenceValue = content;
+                
+                // 添加必要的布局组件
+                SetupFurnitureContentLayout(content);
+            }
+            
+            // 3. 创建或加载 outfitItemPrefab（必须在保存预制体之前完成）
+            GameObject outfitItemPrefab = CreateOutfitItemPrefab();
+            
+            // 4. 创建或加载 furnitureItemPrefab（必须在保存预制体之前完成）
+            GameObject furnitureItemPrefab = CreateFurnitureItemPrefab();
+            
+            // 应用 SerializedObject 的更改
+            serializedObj.FindProperty("outfitItemPrefab").objectReferenceValue = outfitItemPrefab;
+            serializedObj.FindProperty("furnitureItemPrefab").objectReferenceValue = furnitureItemPrefab;
+            
+            // 5. 设置 Tab 按钮
+            Transform tabContainer = FindOrCreateChild(selected.transform, "TabContainer");
+            if (tabContainer != null)
+            {
+                Transform characterTab = tabContainer.Find("CharacterTab");
+                Transform furnitureTab = tabContainer.Find("FurnitureTab");
+                
+                if (characterTab != null)
+                    serializedObj.FindProperty("characterTabBtn").objectReferenceValue = characterTab.GetComponent<Button>();
+                if (furnitureTab != null)
+                    serializedObj.FindProperty("furnitureTabBtn").objectReferenceValue = furnitureTab.GetComponent<Button>();
+            }
+            
+            // 6. 设置关闭按钮
+            Transform closeBtn = selected.transform.Find("CloseBtn");
+            if (closeBtn != null)
+                serializedObj.FindProperty("closeBtn").objectReferenceValue = closeBtn.GetComponent<Button>();
+            
+            serializedObj.ApplyModifiedProperties();
+            
+            EditorUtility.SetDirty(panel);
+            
+            Debug.Log("[BackpackPanelAutoSetup] BackpackPanel 配置完成！");
+            EditorUtility.DisplayDialog("完成", "BackpackPanel 自动配置完成！\n\n所有必要字段已设置。", "确定");
+        }
+        
+        private void FindBackpackPanelInScene()
+        {
+            BackpackPanel[] panels = FindObjectsOfType<BackpackPanel>();
+            if (panels.Length == 0)
+            {
+                EditorUtility.DisplayDialog("提示", "场景中没有找到 BackpackPanel！", "确定");
+                return;
+            }
+            
+            if (panels.Length == 1)
+            {
+                Selection.activeGameObject = panels[0].gameObject;
+                EditorGUIUtility.PingObject(panels[0].gameObject);
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("提示", $"场景中找到 {panels.Length} 个 BackpackPanel，请手动选择。", "确定");
+                Selection.activeObject = panels[0];
             }
         }
         
-        /// <summary>
-        /// 自动配置背包面板
-        /// </summary>
-        private void SetupBackpackPanel()
+        private Transform FindOrCreateChild(Transform parent, string name)
         {
-            // 创建根节点
-            GameObject panelObj = new GameObject("BackpackPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            panelObj.transform.SetParent(transform);
+            if (parent == null) return null;
             
-            var rectTransform = panelObj.GetComponent<RectTransform>();
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
+            Transform child = parent.Find(name);
+            if (child != null) return child;
             
-            var bgImage = panelObj.GetComponent<Image>();
-            bgImage.color = new Color(1f, 1f, 1f, 0.95f);
-            
-            // 添加BackpackPanel脚本
-            var backpackPanel = panelObj.AddComponent<BackpackPanel>();
-            
-            // 1. 创建标题栏
-            CreateTitleBar(panelObj.transform);
-            
-            // 2. 创建关闭按钮
-            backpackPanel.closeBtn = CreateCloseButton(panelObj.transform);
-            
-            // 3. 创建Tab容器
-            backpackPanel.tabContainer = CreateTabContainer(panelObj.transform, backpackPanel);
-            
-            // 4. 创建内容区域
-            CreateContentAreas(panelObj.transform, backpackPanel);
-            
-            // 5. 创建预制体引用（需要在运行时赋值）
-            Debug.Log("[BackpackPanelAutoSetup] 背包面板结构已创建！请手动配置以下引用：");
-            Debug.Log("  - outfitItemPrefab");
-            Debug.Log("  - furnitureItemPrefab");
-            
-            // 选中创建的物体
-            UnityEditor.Selection.activeGameObject = panelObj;
+            // 创建子对象
+            GameObject go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            return go.transform;
         }
         
-        /// <summary>
-        /// 创建标题栏
-        /// </summary>
-        private void CreateTitleBar(Transform parent)
+        private void SetupContentLayout(Transform content)
         {
-            GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
-            titleObj.transform.SetParent(parent);
-            
-            var rect = titleObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 1);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.anchoredPosition = new Vector2(0, -20);
-            rect.sizeDelta = new Vector2(0, 60);
-            
-            var text = titleObj.GetComponent<Text>();
-            text.text = "背包";
-            text.fontSize = 36;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = new Color(0.3f, 0.3f, 0.3f);
-            
-            // 设置字体（如果有默认字体）
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        }
-        
-        /// <summary>
-        /// 创建关闭按钮
-        /// </summary>
-        private Button CreateCloseButton(Transform parent)
-        {
-            GameObject btnObj = new GameObject("CloseBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            btnObj.transform.SetParent(parent);
-            
-            var rect = btnObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(1, 1);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(1, 1);
-            rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(60, 60);
-            
-            var image = btnObj.GetComponent<Image>();
-            image.color = new Color(0.9f, 0.3f, 0.3f);
-            
-            // 添加X文本
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
-            textObj.transform.SetParent(btnObj.transform);
-            var textRect = textObj.GetComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            
-            var text = textObj.GetComponent<Text>();
-            text.text = "×";
-            text.fontSize = 40;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.white;
-            
-            return btnObj.GetComponent<Button>();
-        }
-        
-        /// <summary>
-        /// 创建Tab容器
-        /// </summary>
-        private Transform CreateTabContainer(Transform parent, BackpackPanel panel)
-        {
-            GameObject containerObj = new GameObject("TabContainer", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-            containerObj.transform.SetParent(parent);
-            
-            var rect = containerObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1);
-            rect.anchorMax = new Vector2(0.5f, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.anchoredPosition = new Vector2(0, -100);
-            rect.sizeDelta = new Vector2(400, 60);
-            
-            var layout = containerObj.GetComponent<HorizontalLayoutGroup>();
-            layout.spacing = 20;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            
-            // 创建主角装扮Tab
-            panel.characterTabBtn = CreateTabButton(containerObj.transform, "主角装扮", true);
-            
-            // 创建家园装扮Tab
-            panel.furnitureTabBtn = CreateTabButton(containerObj.transform, "家园装扮", false);
-            
-            return containerObj.transform;
-        }
-        
-        /// <summary>
-        /// 创建Tab按钮
-        /// </summary>
-        private Button CreateTabButton(Transform parent, string text, bool isActive)
-        {
-            GameObject btnObj = new GameObject($"{text}Tab", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            btnObj.transform.SetParent(parent);
-            
-            var rect = btnObj.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(180, 50);
-            
-            var image = btnObj.GetComponent<Image>();
-            image.color = isActive ? new Color(1f, 0.8f, 0.6f) : new Color(0.8f, 0.8f, 0.8f);
-            
-            // 添加文本
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
-            textObj.transform.SetParent(btnObj.transform);
-            var textRect = textObj.GetComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = new Vector2(10, 5);
-            textRect.offsetMax = new Vector2(-10, -5);
-            
-            var txt = textObj.GetComponent<Text>();
-            txt.text = text;
-            txt.fontSize = 24;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.color = new Color(0.2f, 0.2f, 0.2f);
-            
-            return btnObj.GetComponent<Button>();
-        }
-        
-        /// <summary>
-        /// 创建内容区域
-        /// </summary>
-        private void CreateContentAreas(Transform parent, BackpackPanel panel)
-        {
-            // 主角装扮内容区
-            panel.characterContent = CreateScrollView(parent, "CharacterContent", true);
-            
-            // 家园装扮内容区
-            panel.furnitureContent = CreateScrollView(parent, "FurnitureContent", false);
-            
-            // 获取容器引用
-            var characterViewport = panel.characterContent.transform.Find("Viewport");
-            if (characterViewport != null)
+            if (content == null)
             {
-                var characterContent = characterViewport.Find("Content");
-                if (characterContent != null)
-                {
-                    panel.outfitListContainer = characterContent;
-                }
+                Debug.LogError("[BackpackPanelAutoSetup] SetupContentLayout: content 为 null");
+                return;
             }
             
-            var furnitureViewport = panel.furnitureContent.transform.Find("Viewport");
-            if (furnitureViewport != null)
-            {
-                var furnitureContent = furnitureViewport.Find("Content");
-                if (furnitureContent != null)
-                {
-                    panel.furnitureListContainer = furnitureContent;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 创建滚动视图
-        /// </summary>
-        private GameObject CreateScrollView(Transform parent, string name, bool active)
-        {
-            GameObject scrollObj = new GameObject(name, typeof(RectTransform), typeof(ScrollRect), typeof(Image));
-            scrollObj.transform.SetParent(parent);
+            // 确保有 RectTransform
+            RectTransform rect = content.GetComponent<RectTransform>();
+            if (rect == null) rect = content.gameObject.AddComponent<RectTransform>();
             
-            var rect = scrollObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 0);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.offsetMin = new Vector2(40, 100);
-            rect.offsetMax = new Vector2(-40, -180);
+            // 添加 GridLayoutGroup
+            GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
+            if (grid == null) grid = content.gameObject.AddComponent<GridLayoutGroup>();
             
-            var image = scrollObj.GetComponent<Image>();
-            image.color = new Color(0.95f, 0.95f, 0.95f);
+            grid.cellSize = new Vector2(100, 100);
+            grid.spacing = new Vector2(15, 15);
+            grid.padding = new RectOffset(15, 15, 15, 15);
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperCenter;
             
-            var scrollRect = scrollObj.GetComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            
-            // 创建Viewport
-            GameObject viewportObj = new GameObject("Viewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Mask), typeof(Image));
-            viewportObj.transform.SetParent(scrollObj.transform);
-            var viewportRect = viewportObj.GetComponent<RectTransform>();
-            viewportRect.anchorMin = Vector2.zero;
-            viewportRect.anchorMax = Vector2.one;
-            viewportRect.offsetMin = Vector2.zero;
-            viewportRect.offsetMax = Vector2.zero;
-            
-            var mask = viewportObj.GetComponent<Mask>();
-            mask.showMaskGraphic = false;
-            
-            scrollRect.viewport = viewportRect;
-            
-            // 创建Content
-            GameObject contentObj = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
-            contentObj.transform.SetParent(viewportObj.transform);
-            var contentRect = contentObj.GetComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0, 1);
-            contentRect.anchorMax = new Vector2(1, 1);
-            contentRect.pivot = new Vector2(0.5f, 1);
-            contentRect.anchoredPosition = Vector2.zero;
-            contentRect.sizeDelta = Vector2.zero;
-            
-            var layout = contentObj.GetComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(20, 20, 20, 20);
-            layout.spacing = 15;
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = false;
-            layout.childForceExpandWidth = true;
-            
-            var fitter = contentObj.GetComponent<ContentSizeFitter>();
+            // 添加 ContentSizeFitter
+            ContentSizeFitter fitter = content.GetComponent<ContentSizeFitter>();
+            if (fitter == null) fitter = content.gameObject.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        }
+        
+        private void SetupFurnitureContentLayout(Transform content)
+        {
+            SetupContentLayout(content);
+        }
+        
+        private GameObject CreateOutfitItemPrefab()
+        {
+            string path = "Assets/Prefabs/UI/BackpackOutfitItem.prefab";
             
-            scrollRect.content = contentRect;
+            // 检查是否已存在
+            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (existing != null) return existing;
             
-            scrollObj.SetActive(active);
+            // 创建新的预制体
+            GameObject go = new GameObject("BackpackOutfitItem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             
-            return scrollObj;
+            RectTransform rect = go.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(100, 100);
+            
+            Image bg = go.GetComponent<Image>();
+            bg.color = new Color(0.25f, 0.25f, 0.3f);
+            
+            // 添加 OutfitItemUI 脚本
+            var itemUI = go.AddComponent<OutfitItemUI>();
+            
+            // 创建图标
+            GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconObj.transform.SetParent(go.transform, false);
+            
+            RectTransform iconRect = iconObj.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.1f, 0.1f);
+            iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+            
+            // 创建锁定图标（默认隐藏）
+            GameObject lockObj = new GameObject("LockIcon", typeof(RectTransform), typeof(Image));
+            lockObj.transform.SetParent(go.transform, false);
+            lockObj.SetActive(false);
+            
+            RectTransform lockRect = lockObj.GetComponent<RectTransform>();
+            lockRect.anchorMin = new Vector2(0.3f, 0.3f);
+            lockRect.anchorMax = new Vector2(0.7f, 0.7f);
+            lockRect.offsetMin = Vector2.zero;
+            lockRect.offsetMax = Vector2.zero;
+            
+            // 创建已装备标识（默认隐藏）
+            GameObject equippedObj = new GameObject("EquippedIndicator", typeof(RectTransform), typeof(Image));
+            equippedObj.transform.SetParent(go.transform, false);
+            equippedObj.SetActive(false);
+            
+            RectTransform equippedRect = equippedObj.GetComponent<RectTransform>();
+            equippedRect.anchorMin = new Vector2(0.7f, 0.7f);
+            equippedRect.anchorMax = new Vector2(1, 1);
+            equippedRect.offsetMin = Vector2.zero;
+            equippedRect.offsetMax = Vector2.zero;
+            
+            // 保存
+            EnsureDirectoryExists("Assets/Prefabs/UI");
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            DestroyImmediate(go);
+            
+            Debug.Log("[BackpackPanelAutoSetup] 创建 OutfitItem 预制体: " + path);
+            return prefab;
+        }
+        
+        private GameObject CreateFurnitureItemPrefab()
+        {
+            string path = "Assets/Prefabs/UI/FurnitureItem.prefab";
+            
+            // 检查是否已存在
+            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (existing != null) return existing;
+            
+            // 创建新的预制体
+            GameObject go = new GameObject("FurnitureItem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            
+            RectTransform rect = go.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(120, 140);
+            
+            Image bg = go.GetComponent<Image>();
+            bg.color = new Color(0.3f, 0.3f, 0.35f);
+            
+            // 添加 FurnitureItemUI 脚本
+            var itemUI = go.AddComponent<FurnitureItemUI>();
+            
+            // 创建家具图标
+            GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconObj.transform.SetParent(go.transform, false);
+            
+            RectTransform iconRect = iconObj.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.1f, 0.25f);
+            iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+            
+            // 创建名称文本
+            GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(Text));
+            nameObj.transform.SetParent(go.transform, false);
+            
+            RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0.05f, 0.05f);
+            nameRect.anchorMax = new Vector2(0.95f, 0.2f);
+            nameRect.offsetMin = Vector2.zero;
+            nameRect.offsetMax = Vector2.zero;
+            
+            Text nameText = nameObj.GetComponent<Text>();
+            nameText.text = "家具名称";
+            nameText.fontSize = 14;
+            nameText.alignment = TextAnchor.MiddleCenter;
+            nameText.color = Color.white;
+            nameText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            
+            // 保存
+            EnsureDirectoryExists("Assets/Prefabs/UI");
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            DestroyImmediate(go);
+            
+            Debug.Log("[BackpackPanelAutoSetup] 创建 FurnitureItem 预制体: " + path);
+            return prefab;
+        }
+        
+        private void EnsureDirectoryExists(string path)
+        {
+            if (!AssetDatabase.IsValidFolder(path))
+            {
+                string parent = System.IO.Path.GetDirectoryName(path).Replace('\\', '/');
+                string folderName = System.IO.Path.GetFileName(path);
+                AssetDatabase.CreateFolder(parent, folderName);
+            }
         }
     }
 }
