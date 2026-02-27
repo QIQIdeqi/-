@@ -59,6 +59,7 @@ namespace GeometryWarrior
         private GameObject decorationEditToolbar;
         private Button decoFlipBtn;
         private Button decoConfirmBtn;
+        private Button decoRecallBtn; // 收回按钮
         private Slider decoScaleSlider;
         private Text decoScaleValueText;
         
@@ -611,9 +612,15 @@ namespace GeometryWarrior
         /// </summary>
         private void ShowDecorationEditToolbar(HomeDecoration decoration)
         {
-            // 创建工具栏
-            if (decorationEditToolbar == null)
+            // 创建工具栏（如果不存在或需要重建）
+            if (decorationEditToolbar == null || decoRecallBtn == null)
             {
+                // 如果存在旧的，先销毁
+                if (decorationEditToolbar != null)
+                {
+                    Destroy(decorationEditToolbar.transform.parent.gameObject);
+                    decorationEditToolbar = null;
+                }
                 CreateDecorationEditToolbar();
             }
             
@@ -653,7 +660,7 @@ namespace GeometryWarrior
             rect.anchorMin = new Vector2(0.5f, 0.5f);
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(300, 60);
+            rect.sizeDelta = new Vector2(380, 60); // 增加宽度容纳收回按钮
             
             decorationEditToolbar.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
             
@@ -673,6 +680,10 @@ namespace GeometryWarrior
             // 确认按钮
             decoConfirmBtn = CreateToolbarButton(decorationEditToolbar.transform, "确认", new Color(0.4f, 0.8f, 0.4f));
             decoConfirmBtn.onClick.AddListener(OnDecorationConfirm);
+            
+            // 收回按钮（添加到背包）
+            decoRecallBtn = CreateToolbarButton(decorationEditToolbar.transform, "收回", new Color(0.8f, 0.4f, 0.4f));
+            decoRecallBtn.onClick.AddListener(OnDecorationRecall);
         }
         
         /// <summary>
@@ -828,6 +839,41 @@ namespace GeometryWarrior
                 currentEditingDecoration.ConfirmEdit();
             }
             ExitDecorationEditMode();
+        }
+        
+        /// <summary>
+        /// 收回按钮点击 - 将家具收回背包
+        /// </summary>
+        private void OnDecorationRecall()
+        {
+            if (currentEditingDecoration == null) return;
+            
+            string furnitureId = currentEditingDecoration.decorationId;
+            
+            Debug.Log($"[HomeManager] 收回家具到背包: {furnitureId}");
+            
+            // 从库存中减少已放置计数（相当于放回背包）
+            if (FurnitureInventory.Instance != null)
+            {
+                FurnitureInventory.Instance.OnFurnitureRemoved(furnitureId);
+            }
+            
+            // 从列表中移除
+            RemoveDecoration(currentEditingDecoration);
+            
+            // 删除游戏对象
+            Destroy(currentEditingDecoration.gameObject);
+            
+            // 清除保存的位置数据
+            PlayerPrefs.DeleteKey($"{DECORATION_SAVE_KEY}_{furnitureId}");
+            
+            // 重新保存所有家具数据
+            SavePlacedFurniture();
+            
+            // 退出编辑模式
+            ExitDecorationEditMode();
+            
+            Debug.Log($"[HomeManager] 家具 {furnitureId} 已收回背包");
         }
         
         /// <summary>

@@ -22,6 +22,9 @@ namespace FluffyGeometry.Home
         [Tooltip("确认按钮")]
         public Button confirmBtn;
         
+        [Tooltip("取消按钮")]
+        public Button cancelBtn;
+        
         [Tooltip("缩放值显示")]
         public Text scaleValueText;
         
@@ -155,6 +158,49 @@ namespace FluffyGeometry.Home
             {
                 flipBtn.gameObject.SetActive(currentFurniture.canFlip);
             }
+            
+            // 如果没有取消按钮，创建一个
+            if (cancelBtn == null && toolbarPanel != null)
+            {
+                CreateCancelButton();
+            }
+        }
+        
+        /// <summary>
+        /// 创建取消按钮
+        /// </summary>
+        private void CreateCancelButton()
+        {
+            // 创建按钮
+            GameObject btnObj = new GameObject("CancelBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            btnObj.transform.SetParent(toolbarPanel.transform);
+            
+            var rect = btnObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(60, 40);
+            
+            var img = btnObj.GetComponent<Image>();
+            img.color = new Color(0.8f, 0.3f, 0.3f); // 红色
+            
+            // 添加文字
+            GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
+            txtObj.transform.SetParent(btnObj.transform);
+            var txtRect = txtObj.GetComponent<RectTransform>();
+            txtRect.anchorMin = Vector2.zero;
+            txtRect.anchorMax = Vector2.one;
+            txtRect.offsetMin = new Vector2(5, 5);
+            txtRect.offsetMax = new Vector2(-5, -5);
+            
+            var txt = txtObj.GetComponent<Text>();
+            txt.text = "取消";
+            txt.fontSize = 16;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = Color.white;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            
+            cancelBtn = btnObj.GetComponent<Button>();
+            cancelBtn.onClick.AddListener(OnCancelClick);
+            
+            Debug.Log("[FurnitureEditController] 创建取消按钮");
         }
         
         /// <summary>
@@ -169,6 +215,10 @@ namespace FluffyGeometry.Home
             if (confirmBtn != null)
             {
                 confirmBtn.onClick.AddListener(OnConfirmClick);
+            }
+            if (cancelBtn != null)
+            {
+                cancelBtn.onClick.AddListener(OnCancelClick);
             }
         }
         
@@ -185,6 +235,10 @@ namespace FluffyGeometry.Home
             if (confirmBtn != null)
             {
                 confirmBtn.onClick.RemoveListener(OnConfirmClick);
+            }
+            if (cancelBtn != null)
+            {
+                cancelBtn.onClick.RemoveListener(OnCancelClick);
             }
         }
         
@@ -334,6 +388,23 @@ namespace FluffyGeometry.Home
             {
                 scaleValueText.text = $"{currentScale:F1}x";
             }
+        }
+        
+        /// <summary>
+        /// 取消按钮点击
+        /// </summary>
+        private void OnCancelClick()
+        {
+            Debug.Log("[FurnitureEditController] 取消放置家具");
+            
+            // 重新打开背包
+            if (backpackPanel != null)
+            {
+                backpackPanel.Reopen();
+            }
+            
+            // 调用取消
+            Cancel();
         }
         
         /// <summary>

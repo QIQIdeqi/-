@@ -23,12 +23,6 @@ namespace GeometryWarrior
                 Debug.Log($"✅ Obstacle Layer: {obstacleLayer}");
             }
             
-            // 检查必要的Manager
-            if (ProjectileVisualManager.Instance == null)
-            {
-                Debug.LogWarning("⚠️ ProjectileVisualManager 未找到，将使用默认视觉效果");
-            }
-            
             Debug.Log("=== 项目诊断结束 ===");
         }
     }

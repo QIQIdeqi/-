@@ -3,7 +3,7 @@ using UnityEngine;
 namespace GeometryWarrior
 {
     /// <summary>
-    /// Projectile - 玩家飞弹（支持属性系统）
+    /// Projectile - 玩家飞弹（简化版，移除元素系统）
     /// </summary>
     public class Projectile : MonoBehaviour
     {
@@ -12,11 +12,6 @@ namespace GeometryWarrior
         [SerializeField] private float lifetime = 3f;
         [SerializeField] private int damage = 20;
         
-        [Header("属性系统")]
-        public ElementType elementType = ElementType.None;
-        [Range(1, 3)]
-        public int elementLevel = 1;
-        
         [Header("视觉组件")]
         public SpriteRenderer spriteRenderer;
         public TrailRenderer trailRenderer;
@@ -24,8 +19,6 @@ namespace GeometryWarrior
         
         private Transform target;
         private Rigidbody2D rb;
-        private IProjectileEffect elementEffect;
-        private bool isVisualApplied = false;
         
         private void Awake()
         {
@@ -37,14 +30,6 @@ namespace GeometryWarrior
                 trailRenderer = GetComponent<TrailRenderer>();
             
             Destroy(gameObject, lifetime);
-        }
-        
-        private void Start()
-        {
-            // 初始化属性效果
-            InitializeElementEffect();
-            // 应用视觉
-            ApplyVisuals();
         }
         
         private void FixedUpdate()
@@ -66,8 +51,6 @@ namespace GeometryWarrior
             }
         }
         
-        #region 原有接口
-        
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
@@ -78,42 +61,21 @@ namespace GeometryWarrior
             damage = newDamage;
         }
         
-        #endregion
-        
-        #region 属性系统
-        
         /// <summary>
-        /// 设置完整属性（发射时调用）
+        /// 完整初始化（简化版）
         /// </summary>
-        public void SetElement(ElementType type, int level)
-        {
-            elementType = type;
-            elementLevel = Mathf.Clamp(level, 1, 3);
-            InitializeElementEffect();
-            ApplyVisuals();
-        }
-        
-        /// <summary>
-        /// 完整初始化（方向+属性+伤害）
-        /// </summary>
-        public void InitializeFull(Vector2 direction, ElementType element, int level, float dmg)
+        public void InitializeFull(Vector2 direction, float dmg)
         {
             // 设置目标（自动瞄准）
             FindAndSetTarget(direction);
             
-            // 设置属性
-            elementType = element;
-            elementLevel = Mathf.Clamp(level, 1, 3);
+            // 设置伤害
             damage = Mathf.RoundToInt(dmg);
-            
-            // 初始化
-            InitializeElementEffect();
-            ApplyVisuals();
         }
         
         void FindAndSetTarget(Vector2 direction)
         {
-            // 射线检测寻找敌人（不限制Layer，检测所有碰撞体）
+            // 射线检测寻找敌人
             RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, direction, 20f);
             foreach (var hit in hits)
             {
@@ -129,99 +91,16 @@ namespace GeometryWarrior
             }
         }
         
-        void InitializeElementEffect()
-        {
-            switch (elementType)
-            {
-                case ElementType.Fire:
-                    elementEffect = new FireEffect(damage, elementLevel);
-                    break;
-                case ElementType.Ice:
-                    elementEffect = new IceEffect(elementLevel);
-                    break;
-                case ElementType.Electric:
-                    elementEffect = new ElectricEffect(elementLevel);
-                    break;
-                default:
-                    elementEffect = null;
-                    break;
-            }
-        }
-        
-        void ApplyVisuals()
-        {
-            if (isVisualApplied) return;
-            
-            if (ProjectileVisualManager.Instance != null)
-            {
-                ProjectileVisualManager.Instance.ApplyVisual(this, elementType, elementLevel);
-                isVisualApplied = true;
-            }
-            else
-            {
-                ApplyDefaultVisual();
-            }
-        }
-        
-        void ApplyDefaultVisual()
-        {
-            if (spriteRenderer == null) return;
-            
-            switch (elementType)
-            {
-                case ElementType.Fire:
-                    spriteRenderer.color = new Color(1f, 0.27f, 0.27f);
-                    break;
-                case ElementType.Ice:
-                    spriteRenderer.color = new Color(0f, 0.53f, 1f);
-                    break;
-                case ElementType.Electric:
-                    spriteRenderer.color = new Color(0.53f, 0.27f, 1f);
-                    break;
-            }
-            
-            isVisualApplied = true;
-        }
-        
-        void SetTrailColor(Color color)
-        {
-            if (trailRenderer == null) return;
-            
-            // 创建渐变：从开始颜色到透明
-            Gradient gradient = new Gradient();
-            GradientColorKey[] colorKeys = new GradientColorKey[2];
-            GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
-            
-            colorKeys[0] = new GradientColorKey(color, 0f);
-            colorKeys[1] = new GradientColorKey(color, 1f);
-            
-            alphaKeys[0] = new GradientAlphaKey(color.a, 0f);
-            alphaKeys[1] = new GradientAlphaKey(0f, 1f);
-            
-            gradient.SetKeys(colorKeys, alphaKeys);
-            trailRenderer.colorGradient = gradient;
-        }
-        
-        #endregion
-        
         private void OnTriggerEnter2D(Collider2D other)
         {
             EnemyBase enemy = other.GetComponent<EnemyBase>();
             if (enemy != null && !enemy.IsDead)
             {
                 enemy.TakeDamage(damage);
-                elementEffect?.Apply(other.gameObject);
                 SpawnHitEffect();
                 Destroy(gameObject);
                 return;
             }
-            
-            // TODO: 添加障碍物检测（当有了墙/箱子后再启用）
-            // if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
-            // {
-            //     SpawnHitEffect();
-            //     Destroy(gameObject);
-            // }
         }
         
         void SpawnHitEffect()
@@ -229,21 +108,8 @@ namespace GeometryWarrior
             if (hitEffectPrefab != null)
             {
                 var effect = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
-                var main = effect.main;
-                main.startColor = GetElementColor();
                 effect.Play();
                 Destroy(effect.gameObject, 1f);
-            }
-        }
-        
-        Color GetElementColor()
-        {
-            switch (elementType)
-            {
-                case ElementType.Fire: return new Color(1f, 0.27f, 0.27f);
-                case ElementType.Ice: return new Color(0f, 0.53f, 1f);
-                case ElementType.Electric: return new Color(0.53f, 0.27f, 1f);
-                default: return Color.white;
             }
         }
     }

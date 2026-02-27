@@ -1,17 +1,18 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!1 &16270490826875222
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 8504020721099878888}
   - component: {fileID: 7899541202541467181}
   - component: {fileID: 1627221887585114596}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -81,12 +82,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 2745483008629084672}
   - component: {fileID: 8626132471896950111}
   - component: {fileID: 4991098249210515155}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: NameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -160,12 +162,13 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 7527938961330554687}
   - component: {fileID: 70873562844418282}
   - component: {fileID: 7889761251110905121}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: DescText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +242,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 1262654520047651997}
   - component: {fileID: 73936883287291348}
@@ -248,6 +251,7 @@ GameObject:
   - component: {fileID: 1914519449599585294}
   - component: {fileID: 3485467095626918645}
   m_Layer: 5
+  m_HasEditorInfo: 1
   m_Name: UpgradeOption
   m_TagString: Untagged
   m_Icon: {fileID: 0}
