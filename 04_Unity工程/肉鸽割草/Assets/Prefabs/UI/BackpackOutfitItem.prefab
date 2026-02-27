@@ -137,10 +137,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f47b53e98ce9a94595a2b8a95332242, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iconImage: {fileID: 0}
-  lockImage: {fileID: 0}
-  equippedIndicator: {fileID: 0}
-  button: {fileID: 0}
+  iconImage: {fileID: 8215541295227804874}
+  lockImage: {fileID: 8576512548186950265}
+  equippedIndicator: {fileID: 2319309440880298377}
+  button: {fileID: 471225392798811802}
 --- !u!1 &2319309440880298377
 GameObject:
   m_ObjectHideFlags: 0

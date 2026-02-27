@@ -41,20 +41,29 @@ namespace GeometryWarrior
             PartData = part;
             onClickCallback = callback;
             
+            // 调试信息
+            Debug.Log($"[OutfitItemUI] Setup: {part.partName}, iconImage={(iconImage!=null)}, icon={(part.icon!=null)}, partSprite={(part.partSprite!=null)}");
+            
             // 设置图标
             if (iconImage != null)
             {
-                if (isUnlocked)
+                Sprite spriteToShow = part.icon != null ? part.icon : part.partSprite;
+                
+                if (spriteToShow != null)
                 {
-                    iconImage.sprite = part.icon != null ? part.icon : part.partSprite;
-                    iconImage.color = Color.white;
+                    iconImage.sprite = spriteToShow;
+                    iconImage.color = isUnlocked ? Color.white : Color.gray;
+                    Debug.Log($"[OutfitItemUI] 设置图标: {spriteToShow.name}");
                 }
                 else
                 {
-                    // 未解锁时显示灰色
-                    iconImage.sprite = part.icon != null ? part.icon : part.partSprite;
-                    iconImage.color = Color.gray;
+                    Debug.LogWarning($"[OutfitItemUI] {part.partName} 没有图标！请在 OutfitPartData 中设置 icon 或 partSprite");
+                    iconImage.color = new Color(1, 1, 1, 0.2f); // 半透明白色表示缺失
                 }
+            }
+            else
+            {
+                Debug.LogError("[OutfitItemUI] iconImage 未绑定！请在预制体上配置 Icon Image 字段");
             }
             
             // 显示/隐藏锁定图标

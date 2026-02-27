@@ -146,8 +146,21 @@ namespace FluffyGeometry.UI
         {
             gameObject.SetActive(true);
             
-            // 先切换Tab显示基础UI
-            SwitchTab(tabIndex);
+            // 只切换Tab UI，不立即刷新列表（数据可能还没加载）
+            currentTab = tabIndex;
+            
+            // 更新Tab按钮状态
+            UpdateTabButtons();
+            
+            // 显示对应内容
+            if (characterContent != null)
+            {
+                characterContent.SetActive(tabIndex == 0);
+            }
+            if (furnitureContent != null)
+            {
+                furnitureContent.SetActive(tabIndex == 1);
+            }
             
             // 恢复家具列表滚动位置
             if (tabIndex == 1 && furnitureScrollRect != null)
@@ -155,16 +168,43 @@ namespace FluffyGeometry.UI
                 furnitureScrollRect.normalizedPosition = furnitureScrollPos;
             }
             
-            // 延迟刷新家具数量显示，确保 FurnitureInventory 已初始化
-            if (tabIndex == 1)
-            {
-                StartCoroutine(DelayedRefreshFurnitureCounts());
-            }
-            
-            // 如果是主角装扮Tab，延迟刷新列表确保数据已加载
+            // 延迟刷新列表，确保数据已加载（避免显示"空消息"）
             if (tabIndex == 0)
             {
+                // 主角装扮 - 延迟刷新
                 StartCoroutine(DelayedRefreshOutfitList());
+            }
+            else
+            {
+                // 家园装扮 - 延迟刷新
+                StartCoroutine(DelayedRefreshFurnitureList());
+            }
+        }
+        
+        /// <summary>
+        /// 延迟刷新家具列表
+        /// </summary>
+        private System.Collections.IEnumerator DelayedRefreshFurnitureList()
+        {
+            // 等待数据加载完成
+            int attempts = 0;
+            while ((allFurniture == null || allFurniture.Count == 0) && attempts < 10)
+            {
+                yield return new WaitForSeconds(0.05f);
+                attempts++;
+                
+                // 尝试重新加载数据
+                LoadFurnitureData();
+            }
+            
+            Debug.Log($"[BackpackPanel] 延迟刷新家具列表，数据数量: {allFurniture?.Count ?? 0}");
+            RefreshFurnitureList();
+            
+            // 然后刷新数量显示
+            yield return null;
+            foreach (var item in furnitureItems)
+            {
+                item.UpdateCountDisplay();
             }
         }
         
@@ -351,6 +391,16 @@ namespace FluffyGeometry.UI
             }
             outfitItems.Clear();
             
+            // 清除空消息提示（如果存在）
+            if (outfitListContainer != null)
+            {
+                Transform emptyMsg = outfitListContainer.Find("EmptyMessage");
+                if (emptyMsg != null)
+                {
+                    Destroy(emptyMsg.gameObject);
+                }
+            }
+            
             Debug.Log($"[BackpackPanel] RefreshOutfitList 开始 - outfitItemPrefab={outfitItemPrefab != null}, outfitListContainer={outfitListContainer != null}");
             
             if (outfitItemPrefab == null || outfitListContainer == null)
@@ -382,32 +432,41 @@ namespace FluffyGeometry.UI
                 }
                 
                 validCount++;
-                Debug.Log($"[BackpackPanel] 创建部件UI: {partData.partName} ({partData.partId})");
+                Debug.Log($"[BackpackPanel] 创建部件UI: {partData.partName}");
                 
                 try
                 {
                     var item = Instantiate(outfitItemPrefab, outfitListContainer);
                     if (item == null)
                     {
-                        Debug.LogError("[BackpackPanel] Instantiate outfitItemPrefab 返回 null");
+                        Debug.LogError("[BackpackPanel] Instantiate 返回 null");
                         continue;
+                    }
+                    
+                    // 确保 GameObject 是激活的
+                    item.gameObject.SetActive(true);
+                    
+                    // 设置明显的背景颜色用于调试
+                    var image = item.GetComponent<UnityEngine.UI.Image>();
+                    if (image != null)
+                    {
+                        image.color = new Color(0.3f, 0.5f, 0.8f, 1f); // 蓝色背景，调试用
                     }
                     
                     bool isUnlocked = OutfitManager.Instance != null && OutfitManager.Instance.IsPartUnlocked(partData);
                     bool isEquipped = OutfitManager.Instance != null && OutfitManager.Instance.GetEquippedPart(partData.category) == partData;
                     item.Setup(partData, isUnlocked, isEquipped, OnOutfitItemClick);
                     outfitItems.Add(item);
+                    
+                    Debug.Log($"[BackpackPanel] 部件UI创建成功: {item.name}, 位置: {item.transform.localPosition}");
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"[BackpackPanel] 创建部件UI时出错: {e.Message}");
+                    Debug.LogError($"[BackpackPanel] 创建部件UI时出错: {e.Message}\n{e.StackTrace}");
                 }
             }
             
-            if (nullCount > 0)
-            {
-                Debug.LogWarning($"[BackpackPanel] 跳过了 {nullCount} 个 null 部件，成功创建 {validCount} 个");
-            }
+            Debug.Log($"[BackpackPanel] 完成: 成功创建 {outfitItems.Count} 个UI项, 跳过 {nullCount} 个null");
             
             Debug.Log($"[BackpackPanel] 刷新了 {outfitItems.Count} 个装扮部件");
         }
@@ -482,12 +541,28 @@ namespace FluffyGeometry.UI
         }
         
         /// <summary>
-        /// 家具项点击
+        /// 家具项点击 - 单选逻辑
         /// </summary>
         private void OnFurnitureItemClick(FurnitureData furniture)
         {
-            // 显示该家具的详情或选中态
-            //  furnitureItems 中处理选中态显示
+            // 单选：先取消所有其他项的选中状态
+            foreach (var item in furnitureItems)
+            {
+                if (item.furnitureData != furniture)
+                {
+                    item.SetSelected(false);
+                }
+            }
+            
+            // 找到当前点击的项并设置为选中
+            foreach (var item in furnitureItems)
+            {
+                if (item.furnitureData == furniture)
+                {
+                    item.SetSelected(true);
+                    break;
+                }
+            }
         }
         
         /// <summary>
