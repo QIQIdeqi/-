@@ -6,7 +6,7 @@ using FluffyGeometry.UI;
 namespace GeometryWarrior
 {
     /// <summary>
-    /// 背包主界面 - 整合主角装备和家园装扮两个页签
+    /// 背包主界面 - 整合主角装扮和家园布置两个页签
     /// </summary>
     public class BackpackPanel : MonoBehaviour
     {
@@ -55,13 +55,33 @@ namespace GeometryWarrior
             if (homeOutfitTab != null)
                 homeOutfitTab.onClick.AddListener(() => SwitchTab(false));
             
-            // 默认显示主角装备页
-            SwitchTab(true);
+            // 强制设置初始状态 - 确保只有一个页面显示
+            isPlayerEquipActive = false; // 先设为false，让SwitchTab强制执行
+            SwitchTab(true); // 默认显示主角装备页
         }
         
         void OnEnable()
         {
+            // 确保页面状态正确（防止两个同时显示）
+            ForcePageState();
             PlayOpenAnimation();
+        }
+        
+        /// <summary>
+        /// 强制设置页面状态，确保只有一个显示
+        /// </summary>
+        private void ForcePageState()
+        {
+            if (isPlayerEquipActive)
+            {
+                if (playerEquipPage != null) playerEquipPage.SetActive(true);
+                if (homeOutfitPage != null) homeOutfitPage.SetActive(false);
+            }
+            else
+            {
+                if (playerEquipPage != null) playerEquipPage.SetActive(false);
+                if (homeOutfitPage != null) homeOutfitPage.SetActive(true);
+            }
         }
         
         #region 显示/隐藏

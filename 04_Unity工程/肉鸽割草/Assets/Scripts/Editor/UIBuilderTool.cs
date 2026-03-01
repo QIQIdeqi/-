@@ -208,18 +208,19 @@ namespace GeometryWarrior.Editor
             image.color = new Color(1f, 0.72f, 0.77f); // #FFB7C5
             
             // 关闭按钮
-            GameObject closeBtn = CreateButton(topBar.transform, "CloseButton", "✕", 60, 60);
+            GameObject closeBtn = CreateButton(topBar.transform, "CloseButton", "X", 60, 60);
             SetAnchors(closeBtn, Vector2.zero, Vector2.zero);
             SetAnchoredPosition(closeBtn, new Vector2(50, 40));
             
             // 标题
-            GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
             titleObj.transform.SetParent(topBar.transform, false);
-            TextMeshProUGUI titleText = titleObj.GetComponent<TextMeshProUGUI>();
-            titleText.text = "🎀 换装间";
+            Text titleText = titleObj.GetComponent<Text>();
+            titleText.text = "换装间";
             titleText.fontSize = 36;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAnchor.MiddleCenter;
             titleText.color = new Color(0.365f, 0.251f, 0.216f); // #5D4037
+            titleText.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform titleRect = titleObj.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -265,11 +266,11 @@ namespace GeometryWarrior.Editor
             charRect.anchoredPosition = Vector2.zero;
             
             // 旋转按钮
-            GameObject rotateLeft = CreateButton(preview.transform, "RotateLeft", "↺", 60, 60);
+            GameObject rotateLeft = CreateButton(preview.transform, "RotateLeft", "<", 60, 60);
             SetAnchors(rotateLeft, Vector2.zero, Vector2.zero);
             SetAnchoredPosition(rotateLeft, new Vector2(50, 200));
             
-            GameObject rotateRight = CreateButton(preview.transform, "RotateRight", "↻", 60, 60);
+            GameObject rotateRight = CreateButton(preview.transform, "RotateRight", ">", 60, 60);
             SetAnchors(rotateRight, Vector2.right, Vector2.right);
             SetAnchoredPosition(rotateRight, new Vector2(-50, 200));
             
@@ -310,15 +311,16 @@ namespace GeometryWarrior.Editor
             Image image = tab.GetComponent<Image>();
             image.color = new Color(1f, 0.96f, 0.97f); // #FFF5F7
             
-            // 文字
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            // 文字 - 使用普通 UI Text
+            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
             textObj.transform.SetParent(tab.transform, false);
             
-            TextMeshProUGUI tmp = textObj.GetComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = 24;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = new Color(0.365f, 0.251f, 0.216f);
+            Text txt = textObj.GetComponent<Text>();
+            txt.text = text;
+            txt.fontSize = 24;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = new Color(0.365f, 0.251f, 0.216f);
+            txt.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -396,13 +398,13 @@ namespace GeometryWarrior.Editor
             layout.childForceExpandHeight = false;
             
             // 一键卸下
-            GameObject unequipBtn = CreateActionButton(bottomBar.transform, "UnequipAllBtn", "🗑️ 卸下全部", new Color(1f, 0.827f, 0.647f));
+            GameObject unequipBtn = CreateActionButton(bottomBar.transform, "UnequipAllBtn", "卸下全部", new Color(1f, 0.827f, 0.647f));
             
             // 一键换装
-            GameObject quickBtn = CreateActionButton(bottomBar.transform, "QuickEquipBtn", "🎲 随机换装", new Color(0.827f, 0.886f, 0.812f));
+            GameObject quickBtn = CreateActionButton(bottomBar.transform, "QuickEquipBtn", "随机换装", new Color(0.827f, 0.886f, 0.812f));
             
             // 保存
-            GameObject saveBtn = CreateActionButton(bottomBar.transform, "SaveBtn", "✨ 保存装扮", new Color(0.659f, 0.902f, 0.812f));
+            GameObject saveBtn = CreateActionButton(bottomBar.transform, "SaveBtn", "保存装扮", new Color(0.659f, 0.902f, 0.812f));
             
             return bottomBar;
         }
@@ -451,15 +453,16 @@ namespace GeometryWarrior.Editor
             Image image = btn.GetComponent<Image>();
             image.color = new Color(0.659f, 0.902f, 0.812f); // #A8E6CF
             
-            // 文字
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            // 文字 - 使用普通 UI Text
+            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
             textObj.transform.SetParent(btn.transform, false);
             
-            TextMeshProUGUI tmp = textObj.GetComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = 24;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = Color.white;
+            Text txt = textObj.GetComponent<Text>();
+            txt.text = text;
+            txt.fontSize = 24;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = Color.white;
+            txt.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -746,14 +749,15 @@ namespace GeometryWarrior.Editor
             image.color = new Color(0.706f, 0.906f, 0.941f); // #B4E7F0
             
             // 文字
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
             textObj.transform.SetParent(hint.transform, false);
             
-            TextMeshProUGUI text = textObj.GetComponent<TextMeshProUGUI>();
-            text.text = "💬 点击对话";
+            Text text = textObj.GetComponent<Text>();
+            text.text = "点击对话";
             text.fontSize = 24;
-            text.alignment = TextAlignmentOptions.Center;
+            text.alignment = TextAnchor.MiddleCenter;
             text.color = new Color(0.365f, 0.251f, 0.216f);
+            text.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -781,14 +785,15 @@ namespace GeometryWarrior.Editor
             image.color = new Color(1f, 0.827f, 0.647f); // #FFD3A5
             
             // 箭头 + 文字
-            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
             textObj.transform.SetParent(hint.transform, false);
             
-            TextMeshProUGUI text = textObj.GetComponent<TextMeshProUGUI>();
-            text.text = "▲ 点击离开";
+            Text text = textObj.GetComponent<Text>();
+            text.text = "点击离开";
             text.fontSize = 22;
-            text.alignment = TextAlignmentOptions.Center;
+            text.alignment = TextAnchor.MiddleCenter;
             text.color = new Color(0.365f, 0.251f, 0.216f);
+            text.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -884,13 +889,14 @@ namespace GeometryWarrior.Editor
             iconRect.sizeDelta = new Vector2(80, 80);
             
             // Name
-            GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(Text));
             nameObj.transform.SetParent(partItem.transform, false);
-            TextMeshProUGUI nameText = nameObj.GetComponent<TextMeshProUGUI>();
+            Text nameText = nameObj.GetComponent<Text>();
             nameText.text = "部件名称";
             nameText.fontSize = 18;
-            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.alignment = TextAnchor.MiddleCenter;
             nameText.color = new Color(0.365f, 0.251f, 0.216f);
+            nameText.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform nameRect = nameObj.GetComponent<RectTransform>();
             nameRect.anchorMin = new Vector2(0, 0);
@@ -899,15 +905,16 @@ namespace GeometryWarrior.Editor
             nameRect.offsetMax = new Vector2(-5, -5);
             
             // Status
-            GameObject statusObj = new GameObject("Status", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject statusObj = new GameObject("Status", typeof(RectTransform), typeof(Text));
             statusObj.transform.SetParent(partItem.transform, false);
             statusObj.SetActive(false);
             
-            TextMeshProUGUI statusText = statusObj.GetComponent<TextMeshProUGUI>();
-            statusText.text = "✅ 已装备";
+            Text statusText = statusObj.GetComponent<Text>();
+            statusText.text = "已装备";
             statusText.fontSize = 14;
-            statusText.alignment = TextAlignmentOptions.Center;
+            statusText.alignment = TextAnchor.MiddleCenter;
             statusText.color = new Color(0.4f, 0.7f, 0.5f);
+            statusText.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform statusRect = statusObj.GetComponent<RectTransform>();
             statusRect.anchorMin = new Vector2(0, 0.7f);
@@ -1118,12 +1125,16 @@ namespace GeometryWarrior.Editor
             layout.childForceExpandHeight = false;
             
             // 主角装备页签
-            GameObject playerTab = CreateTabButton(tabs.transform, "PlayerEquipTab", "⚔️ 主角装备");
+            GameObject playerTab = CreateTabButton(tabs.transform, "PlayerEquipTab", "主角装备");
             SetLayoutElement(playerTab, 180, 70);
             
             // 家园装扮页签
-            GameObject outfitTab = CreateTabButton(tabs.transform, "HomeOutfitTab", "🎀 家园装扮");
+            GameObject outfitTab = CreateTabButton(tabs.transform, "HomeOutfitTab", "家园装扮");
             SetLayoutElement(outfitTab, 180, 70);
+            
+            // 确保页签在最上层（在内容页面之后创建，所以自然在最上）
+            // 设置Tabs的SiblingIndex确保在最上层
+            tabs.transform.SetAsLastSibling();
             
             return tabs;
         }
@@ -1143,14 +1154,15 @@ namespace GeometryWarrior.Editor
             image.color = new Color(1f, 1f, 1f, 0.5f);
             
             // 占位文字
-            GameObject hintObj = new GameObject("Hint", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject hintObj = new GameObject("Hint", typeof(RectTransform), typeof(Text));
             hintObj.transform.SetParent(page.transform, false);
             
-            TextMeshProUGUI hintText = hintObj.GetComponent<TextMeshProUGUI>();
+            Text hintText = hintObj.GetComponent<Text>();
             hintText.text = "主角装备页面\n（待配置）";
             hintText.fontSize = 28;
-            hintText.alignment = TextAlignmentOptions.Center;
+            hintText.alignment = TextAnchor.MiddleCenter;
             hintText.color = new Color(0.5f, 0.5f, 0.5f);
+            hintText.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform hintRect = hintObj.GetComponent<RectTransform>();
             hintRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -1176,14 +1188,15 @@ namespace GeometryWarrior.Editor
             image.color = new Color(1f, 1f, 1f, 0.5f);
             
             // 占位文字（OutfitPanel会在这里实例化）
-            GameObject hintObj = new GameObject("Hint", typeof(RectTransform), typeof(TextMeshProUGUI));
+            GameObject hintObj = new GameObject("Hint", typeof(RectTransform), typeof(Text));
             hintObj.transform.SetParent(page.transform, false);
             
-            TextMeshProUGUI hintText = hintObj.GetComponent<TextMeshProUGUI>();
+            Text hintText = hintObj.GetComponent<Text>();
             hintText.text = "家园装扮页面\n（OutfitPanelNew 会在这里显示）";
             hintText.fontSize = 24;
-            hintText.alignment = TextAlignmentOptions.Center;
+            hintText.alignment = TextAnchor.MiddleCenter;
             hintText.color = new Color(0.5f, 0.5f, 0.5f);
+            hintText.font = Resources.GetBuiltinResource<Font>("SIMHEI.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
             
             RectTransform hintRect = hintObj.GetComponent<RectTransform>();
             hintRect.anchorMin = new Vector2(0.5f, 0.5f);

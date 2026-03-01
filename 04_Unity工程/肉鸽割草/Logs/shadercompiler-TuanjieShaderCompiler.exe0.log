@@ -1,3 +1,4 @@
 Base path: 'D:/02_WorkSoftware/TuanJieEditor/2022.3.61t10/Editor/Data', plugins path 'D:/02_WorkSoftware/TuanJieEditor/2022.3.61t10/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
 
+Cmd: shutdown

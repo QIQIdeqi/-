@@ -182,6 +182,42 @@ namespace FluffyGeometry.Home
         }
         
         /// <summary>
+        /// 获取所有家具数据（用于背包页面显示）
+        /// </summary>
+        public List<FurnitureData> GetAllFurnitureData()
+        {
+            List<FurnitureData> result = new List<FurnitureData>();
+            
+            // 从 Resources 加载所有 FurnitureData
+            FurnitureData[] allFurniture = Resources.LoadAll<FurnitureData>("Furniture");
+            if (allFurniture != null)
+            {
+                foreach (var furniture in allFurniture)
+                {
+                    if (furniture != null && !result.Contains(furniture))
+                    {
+                        result.Add(furniture);
+                    }
+                }
+            }
+            
+            // 也检查 initialFurniture 中引用的
+            foreach (var data in initialFurniture)
+            {
+                if (!string.IsNullOrEmpty(data.furnitureId))
+                {
+                    FurnitureData furniture = System.Array.Find(allFurniture, f => f.furnitureId == data.furnitureId);
+                    if (furniture != null && !result.Contains(furniture))
+                    {
+                        result.Add(furniture);
+                    }
+                }
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
         /// 获取所有已知的家具ID（包括有库存的或有放置记录的）
         /// </summary>
         public List<string> GetAllFurnitureIds()

@@ -917,5 +917,64 @@ namespace GeometryWarrior
         }
         
         #endregion
+        
+        #region 背包页面支持
+        
+        /// <summary>
+        /// 获取已解锁的家具列表（用于背包页面显示）
+        /// </summary>
+        public List<FurnitureData> GetUnlockedFurnitureList()
+        {
+            List<FurnitureData> result = new List<FurnitureData>();
+            
+            // 从 FurnitureInventory 获取所有家具数据
+            if (FurnitureInventory.Instance != null)
+            {
+                var allFurniture = FurnitureInventory.Instance.GetAllFurnitureData();
+                foreach (var furniture in allFurniture)
+                {
+                    if (furniture != null && furniture.isUnlocked && !result.Contains(furniture))
+                    {
+                        result.Add(furniture);
+                    }
+                }
+            }
+            else
+            {
+                // 如果 FurnitureInventory 不存在，直接从 Resources 加载
+                FurnitureData[] allFurniture = Resources.LoadAll<FurnitureData>("Furniture");
+                if (allFurniture != null)
+                {
+                    foreach (var furniture in allFurniture)
+                    {
+                        if (furniture != null && furniture.isUnlocked && !result.Contains(furniture))
+                        {
+                            result.Add(furniture);
+                        }
+                    }
+                }
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// 开始放置家具（从背包页面调用）
+        /// </summary>
+        public void StartFurniturePlacement(FurnitureData furniture)
+        {
+            if (furniture == null)
+            {
+                Debug.LogWarning("[HomeManager] StartFurniturePlacement: furniture is null");
+                return;
+            }
+            
+            Debug.Log($"[HomeManager] 开始放置家具: {furniture.furnitureName}");
+            
+            // 进入家具编辑模式
+            EnterFurnitureEditMode(furniture, BackpackPanel.Instance);
+        }
+        
+        #endregion
     }
 }

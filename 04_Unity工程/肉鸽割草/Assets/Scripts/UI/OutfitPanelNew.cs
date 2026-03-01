@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using GeometryWarrior;
 
 /// <summary>
@@ -54,11 +53,11 @@ public class OutfitPanelNew : MonoBehaviour
     
     private Dictionary<OutfitCategory, string> categoryNames = new Dictionary<OutfitCategory, string>
     {
-        { OutfitCategory.Bow, "🎀 头饰" },
-        { OutfitCategory.Hat, "👒 帽子" },
-        { OutfitCategory.Glasses, "👓 眼镜" },
-        { OutfitCategory.Scarf, "📿 围巾" },
-        { OutfitCategory.Backpack, "🎒 背饰" }
+        { OutfitCategory.Bow, "头饰" },
+        { OutfitCategory.Hat, "帽子" },
+        { OutfitCategory.Glasses, "眼镜" },
+        { OutfitCategory.Scarf, "围巾" },
+        { OutfitCategory.Backpack, "背饰" }
     };
     
     private OutfitCategory currentCategory;
@@ -242,7 +241,7 @@ public class OutfitPanelNew : MonoBehaviour
             categoryTabs.Add(tabObj);
             
             // 设置标签文本
-            var text = tabObj.GetComponentInChildren<TextMeshProUGUI>();
+            var text = tabObj.GetComponentInChildren<Text>();
             if (text != null) text.text = categoryNames[category];
             
             // 设置按钮事件
@@ -340,7 +339,7 @@ public class OutfitPanelNew : MonoBehaviour
         }
         
         // 设置名称 - 使用 partName 字段
-        var nameText = itemObj.transform.Find("Name")?.GetComponent<TextMeshProUGUI>();
+        var nameText = itemObj.transform.Find("Name")?.GetComponent<Text>();
         if (nameText != null) nameText.text = part.partName;
         
         // 检查是否已装备
@@ -352,17 +351,17 @@ public class OutfitPanelNew : MonoBehaviour
         
         // 设置状态标签
         var statusObj = itemObj.transform.Find("Status")?.gameObject;
-        var statusText = statusObj?.GetComponent<TextMeshProUGUI>();
+        var statusText = statusObj?.GetComponent<Text>();
         if (statusText != null)
         {
             if (isEquipped)
             {
-                statusText.text = "✅ 已装备";
+                statusText.text = "已装备";
                 statusObj.SetActive(true);
             }
             else if (!isUnlocked)
             {
-                statusText.text = "🔒 未解锁";
+                statusText.text = "未解锁";
                 statusObj.SetActive(true);
             }
             else
@@ -396,8 +395,13 @@ public class OutfitPanelNew : MonoBehaviour
     
     private IEnumerator ItemEntryAnimation(GameObject itemObj, int index)
     {
+        if (itemObj == null) yield break;
+        
         itemObj.transform.localScale = Vector3.zero;
         yield return new WaitForSeconds(index * 0.03f);
+        
+        // 检查是否已被销毁
+        if (itemObj == null) yield break;
         
         if (useDOTween)
         {
@@ -412,6 +416,9 @@ public class OutfitPanelNew : MonoBehaviour
             float timer = 0;
             while (timer < 0.3f)
             {
+                // 每帧检查是否已被销毁
+                if (itemObj == null) yield break;
+                
                 timer += Time.deltaTime;
                 float t = timer / 0.3f;
                 float scale = Mathf.Lerp(0, 1, Mathf.Sin(t * Mathf.PI * 0.5f) * 1.2f);
@@ -419,7 +426,9 @@ public class OutfitPanelNew : MonoBehaviour
                 itemObj.transform.localScale = Vector3.one * scale;
                 yield return null;
             }
-            itemObj.transform.localScale = Vector3.one;
+            
+            if (itemObj != null)
+                itemObj.transform.localScale = Vector3.one;
         }
     }
     
@@ -457,27 +466,36 @@ public class OutfitPanelNew : MonoBehaviour
     
     private IEnumerator ShakeAnimation(GameObject target)
     {
+        if (target == null) yield break;
+        
         Vector3 originalPos = target.transform.position;
         float timer = 0;
         
         while (timer < 0.3f)
         {
+            if (target == null) yield break;
+            
             timer += Time.deltaTime;
             float offset = Mathf.Sin(timer * 50) * 5f;
             target.transform.position = originalPos + Vector3.right * offset;
             yield return null;
         }
         
-        target.transform.position = originalPos;
+        if (target != null)
+            target.transform.position = originalPos;
     }
     
     private IEnumerator PunchScaleAnimation(GameObject target)
     {
+        if (target == null) yield break;
+        
         Vector3 originalScale = target.transform.localScale;
         float timer = 0;
         
         while (timer < 0.2f)
         {
+            if (target == null) yield break;
+            
             timer += Time.deltaTime;
             float t = timer / 0.2f;
             float scale = 1 + Mathf.Sin(t * Mathf.PI) * 0.1f;
@@ -485,7 +503,8 @@ public class OutfitPanelNew : MonoBehaviour
             yield return null;
         }
         
-        target.transform.localScale = originalScale;
+        if (target != null)
+            target.transform.localScale = originalScale;
     }
     
     #endregion
@@ -569,7 +588,7 @@ public class OutfitPanelNew : MonoBehaviour
         
         // 播放保存成功动效
         StartCoroutine(ButtonPunchAnimation(saveButton.transform));
-        ShowToast("✨ 装扮已保存！");
+        ShowToast("装扮已保存！");
     }
     
     private void UnequipAll()
@@ -606,16 +625,20 @@ public class OutfitPanelNew : MonoBehaviour
         
         // 播放动效
         StartCoroutine(ButtonPunchAnimation(quickEquipButton.transform));
-        ShowToast("🎲 随机换装完成！");
+        ShowToast("随机换装完成！");
     }
     
     private IEnumerator ButtonPunchAnimation(Transform button)
     {
+        if (button == null) yield break;
+        
         Vector3 originalScale = button.localScale;
         float timer = 0;
         
         while (timer < 0.3f)
         {
+            if (button == null) yield break;
+            
             timer += Time.deltaTime;
             float t = timer / 0.3f;
             float scale = 1 + Mathf.Sin(t * Mathf.PI * 2) * 0.15f;
@@ -623,7 +646,8 @@ public class OutfitPanelNew : MonoBehaviour
             yield return null;
         }
         
-        button.localScale = originalScale;
+        if (button != null)
+            button.localScale = originalScale;
     }
     
     private void ClosePanel()
