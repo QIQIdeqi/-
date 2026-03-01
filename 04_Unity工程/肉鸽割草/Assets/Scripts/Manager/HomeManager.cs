@@ -15,7 +15,7 @@ namespace GeometryWarrior
         
         [Header("【场景设置】")]
         [Tooltip("主菜单场景的名称，点击离开时会加载此场景")]
-        [SerializeField] private string mainMenuSceneName = "MainScene";
+        [SerializeField] private string mainMenuSceneName = "GameScene"; // 主菜单场景名
         
         [Header("【玩家设置】")]
         [Tooltip("玩家角色预制体")]
@@ -439,7 +439,7 @@ namespace GeometryWarrior
         /// <summary>
         /// 进入家具编辑模式
         /// </summary>
-        public void EnterFurnitureEditMode(FurnitureData furniture, FluffyGeometry.UI.BackpackPanel backpackPanel)
+        public void EnterFurnitureEditMode(FurnitureData furniture, BackpackPanel backpackPanel)
         {
             if (furnitureEditControllerPrefab == null) return;
             

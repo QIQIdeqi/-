@@ -67,7 +67,36 @@ namespace GeometryWarrior
         
         private void Start()
         {
+            // 重新绑定当前场景的 UI 引用
+            RebindUIPanels();
             UpdateUIForState();
+        }
+        
+        /// <summary>
+        /// 重新绑定 UI 面板引用（场景切换后调用）
+        /// </summary>
+        private void RebindUIPanels()
+        {
+            // 只在需要时重新查找
+            if (mainMenuPanel == null)
+            {
+                mainMenuPanel = FindObjectOfType<MainMenuPanel>(true);
+            }
+            
+            if (gameOverPanel == null)
+            {
+                gameOverPanel = FindObjectOfType<GameOverPanel>(true);
+            }
+            
+            if (hudCanvas == null)
+            {
+                // 查找 HUD Canvas（通过 GameHUD 组件）
+                GameHUD hud = FindObjectOfType<GameHUD>(true);
+                if (hud != null)
+                {
+                    hudCanvas = hud.gameObject;
+                }
+            }
         }
         
         private void Update()
@@ -289,6 +318,9 @@ namespace GeometryWarrior
         private void UpdateUIForState()
         {
             Debug.Log($"[GameManager] UpdateUIForState: {currentState}, hudCanvas={hudCanvas != null}");
+            
+            // 重新绑定 UI 引用（场景切换后引用可能丢失）
+            RebindUIPanels();
             
             if (mainMenuPanel != null)
             {

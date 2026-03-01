@@ -87,15 +87,16 @@ namespace GeometryWarrior
         
         /// <summary>
         /// 应用当前皮肤
+        /// 旧版 Skin 系统已弃用，使用 OutfitManager + PlayerOutfitApplier
         /// </summary>
         private void ApplyCurrentSkin()
         {
-            if (SkinManager.Instance != null)
-            {
-                ApplySkin(SkinManager.Instance.GetCurrentSkin());
-            }
+            // 装扮系统由 PlayerOutfitApplier 处理
+            // 这里不再手动应用皮肤
         }
         
+        // 旧版皮肤系统已弃用，使用 OutfitManager + PlayerOutfitApplier
+        /*
         /// <summary>
         /// 应用皮肤
         /// </summary>
@@ -148,6 +149,7 @@ namespace GeometryWarrior
             // 发光特效 - 通过调整材质或添加光源实现
             // 这里简单处理，实际项目中可能需要更复杂的Shader
         }
+        */
         
         private void Update()
         {

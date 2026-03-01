@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using GeometryWarrior;
 
 namespace FluffyGeometry.Home
 {
@@ -63,12 +64,12 @@ namespace FluffyGeometry.Home
         public System.Action OnCancel;
         
         // 背包面板引用（用于回调）
-        private FluffyGeometry.UI.BackpackPanel backpackPanel;
+        private BackpackPanel backpackPanel;
         
         /// <summary>
         /// 获取背包面板引用
         /// </summary>
-        public FluffyGeometry.UI.BackpackPanel BackpackPanel => backpackPanel;
+        public BackpackPanel BackpackPanel => backpackPanel;
         
         // 相机
         private Camera mainCamera;
@@ -79,7 +80,7 @@ namespace FluffyGeometry.Home
         // 初始位置（用于取消时恢复）
         private Vector3 initialPosition;
         
-        public void Initialize(FurnitureData furniture, FluffyGeometry.UI.BackpackPanel panel)
+        public void Initialize(FurnitureData furniture, BackpackPanel panel)
         {
             currentFurniture = furniture;
             backpackPanel = panel;

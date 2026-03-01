@@ -1,601 +1,367 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using FluffyGeometry.Home;
-using GeometryWarrior;
+using TMPro;
+using FluffyGeometry.UI;
 
-namespace FluffyGeometry.UI
+namespace GeometryWarrior
 {
     /// <summary>
-    /// 背包面板 - 整合主角装扮和家园装扮
+    /// 背包主界面 - 整合主角装备和家园装扮两个页签
     /// </summary>
     public class BackpackPanel : MonoBehaviour
     {
-        [Header("【UI引用 - 主面板】")]
-        [Tooltip("关闭按钮")]
-        public Button closeBtn;
+        public static BackpackPanel Instance { get; private set; }
         
-        [Tooltip("Tab容器")]
-        public Transform tabContainer;
+        [Header("【面板引用】")]
+        [Tooltip("面板内容")] public RectTransform contentPanel;
+        [Tooltip("背景遮罩")] public CanvasGroup overlay;
+        [Tooltip("关闭按钮")] public Button closeButton;
         
-        [Tooltip("主角装扮Tab按钮")]
-        public Button characterTabBtn;
+        [Header("【页签】")]
+        [Tooltip("主角装备页签")] public Button playerEquipTab;
+        [Tooltip("家园装扮页签")] public Button homeOutfitTab;
+        [Tooltip("主角装备页")] public GameObject playerEquipPage;
+        [Tooltip("家园装扮页")] public GameObject homeOutfitPage;
         
-        [Tooltip("家园装扮Tab按钮")]
-        public Button furnitureTabBtn;
+        [Header("【页签样式】")]
+        [Tooltip("选中颜色")] public Color selectedTabColor = new Color(1f, 0.72f, 0.77f); // #FFB7C5
+        [Tooltip("未选中颜色")] public Color unselectedTabColor = new Color(1f, 0.96f, 0.97f); // #FFF5F7
         
-        [Tooltip("主角装扮内容区")]
-        public GameObject characterContent;
+        [Header("【家园装扮页】")]
+        [Tooltip("OutfitPanelNew 预制体")] public GameObject outfitPanelPrefab;
         
-        [Tooltip("家园装扮内容区")]
-        public GameObject furnitureContent;
+        private bool isPlayerEquipActive = true;
+        private GameObject currentOutfitPanel;
         
-        [Header("【UI引用 - 主角装扮】")]
-        [Tooltip("装扮部件列表容器")]
-        public Transform outfitListContainer;
+        void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
         
-        [Tooltip("装扮部件项预制体")]
-        public OutfitItemUI outfitItemPrefab;
+        void Start()
+        {
+            // 绑定按钮
+            if (closeButton != null)
+                closeButton.onClick.AddListener(Hide);
+            
+            if (playerEquipTab != null)
+                playerEquipTab.onClick.AddListener(() => SwitchTab(true));
+            
+            if (homeOutfitTab != null)
+                homeOutfitTab.onClick.AddListener(() => SwitchTab(false));
+            
+            // 默认显示主角装备页
+            SwitchTab(true);
+        }
         
-        [Tooltip("分类标签容器")]
-        public Transform categoryContainer;
+        void OnEnable()
+        {
+            PlayOpenAnimation();
+        }
         
-        [Header("【UI引用 - 家园装扮】")]
-        [Tooltip("家具列表容器")]
-        public Transform furnitureListContainer;
+        #region 显示/隐藏
         
-        [Tooltip("家具项预制体")]
-        public FurnitureItemUI furnitureItemPrefab;
+        // 背包按钮引用（可选，用于回调）
+        private BackpackButton backpackButton;
         
-        [Header("【配置】")]
-        [Tooltip("当前选中的Tab索引")]
-        public int currentTab = 0; // 0=主角, 1=家园
-        
-        [Tooltip("列表项间距")]
-        public float itemSpacing = 10f;
-        
-        [Header("【状态】")]
-        [Tooltip("背包按钮引用")]
-        public BackpackButton backpackButton;
-        
-        [Tooltip("家具列表滚动位置")]
-        public Vector2 furnitureScrollPos;
-        
-        // 回调：选择家具进行装饰
-        public System.Action<FurnitureData> OnDecorateFurniture;
-        
-        // 所有装扮部件数据
-        private List<OutfitPartData> allOutfitParts = new List<OutfitPartData>();
-        
-        // 所有家具数据
-        private List<FurnitureData> allFurniture = new List<FurnitureData>();
-        
-        // 装扮项列表
-        private List<OutfitItemUI> outfitItems = new List<OutfitItemUI>();
-        
-        // 家具项列表
-        private List<FurnitureItemUI> furnitureItems = new List<FurnitureItemUI>();
-        
-        private ScrollRect furnitureScrollRect;
-        
+        /// <summary>
+        /// 初始化（由BackpackButton调用）
+        /// </summary>
         public void Initialize(BackpackButton button)
         {
             backpackButton = button;
-            
-            // 绑定关闭按钮
-            if (closeBtn != null)
-            {
-                closeBtn.onClick.AddListener(OnCloseClick);
-            }
-            
-            // 绑定Tab按钮
-            if (characterTabBtn != null)
-            {
-                characterTabBtn.onClick.AddListener(() => SwitchTab(0));
-            }
-            if (furnitureTabBtn != null)
-            {
-                furnitureTabBtn.onClick.AddListener(() => SwitchTab(1));
-            }
-            
-            // 获取滚动组件
-            if (furnitureContent != null)
-            {
-                furnitureScrollRect = furnitureContent.GetComponentInParent<ScrollRect>();
-            }
-            
-            // 延迟加载数据，确保 OutfitManager 已初始化
-            StartCoroutine(DelayedLoadData());
-        }
-        
-        private System.Collections.IEnumerator DelayedLoadData()
-        {
-            // 等待一帧，确保 OutfitManager 已初始化
-            yield return null;
-            
-            // 再等待一帧，确保所有单例都已就绪
-            if (OutfitManager.Instance == null)
-            {
-                Debug.Log("[BackpackPanel] 等待 OutfitManager 初始化...");
-                yield return new WaitForSeconds(0.1f);
-            }
-            
-            LoadData();
-        }
-        
-        private void OnDestroy()
-        {
-            if (closeBtn != null)
-            {
-                closeBtn.onClick.RemoveListener(OnCloseClick);
-            }
-            if (characterTabBtn != null)
-            {
-                characterTabBtn.onClick.RemoveAllListeners();
-            }
-            if (furnitureTabBtn != null)
-            {
-                furnitureTabBtn.onClick.RemoveAllListeners();
-            }
         }
         
         /// <summary>
-        /// 显示面板
+        /// 显示背包界面
         /// </summary>
-        public void Show(int tabIndex = 0)
+        public void Show()
         {
             gameObject.SetActive(true);
-            
-            // 只切换Tab UI，不立即刷新列表（数据可能还没加载）
-            currentTab = tabIndex;
-            
-            // 更新Tab按钮状态
-            UpdateTabButtons();
-            
-            // 显示对应内容
-            if (characterContent != null)
-            {
-                characterContent.SetActive(tabIndex == 0);
-            }
-            if (furnitureContent != null)
-            {
-                furnitureContent.SetActive(tabIndex == 1);
-            }
-            
-            // 恢复家具列表滚动位置
-            if (tabIndex == 1 && furnitureScrollRect != null)
-            {
-                furnitureScrollRect.normalizedPosition = furnitureScrollPos;
-            }
-            
-            // 延迟刷新列表，确保数据已加载（避免显示"空消息"）
-            if (tabIndex == 0)
-            {
-                // 主角装扮 - 延迟刷新
-                StartCoroutine(DelayedRefreshOutfitList());
-            }
-            else
-            {
-                // 家园装扮 - 延迟刷新
-                StartCoroutine(DelayedRefreshFurnitureList());
-            }
         }
         
         /// <summary>
-        /// 延迟刷新家具列表
+        /// 显示背包界面（指定默认页签）
         /// </summary>
-        private System.Collections.IEnumerator DelayedRefreshFurnitureList()
+        public void Show(int defaultTab)
         {
-            // 等待数据加载完成
-            int attempts = 0;
-            while ((allFurniture == null || allFurniture.Count == 0) && attempts < 10)
-            {
-                yield return new WaitForSeconds(0.05f);
-                attempts++;
-                
-                // 尝试重新加载数据
-                LoadFurnitureData();
-            }
-            
-            Debug.Log($"[BackpackPanel] 延迟刷新家具列表，数据数量: {allFurniture?.Count ?? 0}");
-            RefreshFurnitureList();
-            
-            // 然后刷新数量显示
-            yield return null;
-            foreach (var item in furnitureItems)
-            {
-                item.UpdateCountDisplay();
-            }
+            gameObject.SetActive(true);
+            // defaultTab: 0=主角装备, 1=家园装扮
+            SwitchTab(defaultTab == 0);
         }
         
         /// <summary>
-        /// 延迟刷新装扮列表
-        /// </summary>
-        private System.Collections.IEnumerator DelayedRefreshOutfitList()
-        {
-            // 等待数据加载完成
-            int attempts = 0;
-            while ((allOutfitParts == null || allOutfitParts.Count == 0) && attempts < 10)
-            {
-                yield return new WaitForSeconds(0.05f);
-                attempts++;
-                
-                // 尝试重新加载数据
-                if (OutfitManager.Instance != null)
-                {
-                    allOutfitParts = OutfitManager.Instance.GetAllParts();
-                }
-            }
-            
-            Debug.Log($"[BackpackPanel] 延迟刷新装扮列表，数据数量: {allOutfitParts?.Count ?? 0}");
-            RefreshOutfitList();
-        }
-        
-        /// <summary>
-        /// 延迟刷新家具数量
-        /// </summary>
-        private System.Collections.IEnumerator DelayedRefreshFurnitureCounts()
-        {
-            // 等待一帧，确保 FurnitureInventory 已初始化
-            yield return null;
-            
-            // 刷新所有家具项的数量显示
-            foreach (var item in furnitureItems)
-            {
-                item.UpdateCountDisplay();
-            }
-        }
-        
-        /// <summary>
-        /// 隐藏面板
+        /// 隐藏背包界面
         /// </summary>
         public void Hide()
         {
-            // 保存滚动位置
-            if (furnitureScrollRect != null)
-            {
-                furnitureScrollPos = furnitureScrollRect.normalizedPosition;
-            }
-            
-            gameObject.SetActive(false);
-        }
-        
-        /// <summary>
-        /// 关闭按钮点击
-        /// </summary>
-        private void OnCloseClick()
-        {
-            Hide();
-            if (backpackButton != null)
-            {
-                backpackButton.OnPanelClosed();
-            }
-            Destroy(gameObject);
-        }
-        
-        /// <summary>
-        /// 切换Tab
-        /// </summary>
-        public void SwitchTab(int tabIndex)
-        {
-            currentTab = tabIndex;
-            
-            // 更新Tab按钮状态
-            UpdateTabButtons();
-            
-            // 显示对应内容
-            if (characterContent != null)
-            {
-                characterContent.SetActive(tabIndex == 0);
-            }
-            if (furnitureContent != null)
-            {
-                furnitureContent.SetActive(tabIndex == 1);
-            }
-            
-            // 刷新列表
-            if (tabIndex == 0)
-            {
-                RefreshOutfitList();
-            }
-            else
-            {
-                RefreshFurnitureList();
-            }
-        }
-        
-        /// <summary>
-        /// 更新Tab按钮显示状态
-        /// </summary>
-        private void UpdateTabButtons()
-        {
-            // 这里可以设置选中态图片或颜色
-            if (characterTabBtn != null)
-            {
-                var colors = characterTabBtn.colors;
-                colors.normalColor = currentTab == 0 ? Color.white : new Color(0.8f, 0.8f, 0.8f);
-                characterTabBtn.colors = colors;
-            }
-            if (furnitureTabBtn != null)
-            {
-                var colors = furnitureTabBtn.colors;
-                colors.normalColor = currentTab == 1 ? Color.white : new Color(0.8f, 0.8f, 0.8f);
-                furnitureTabBtn.colors = colors;
-            }
-        }
-        
-        /// <summary>
-        /// 加载数据
-        /// </summary>
-        private void LoadData()
-        {
-            Debug.Log("[BackpackPanel] LoadData 开始");
-            
-            // 从OutfitManager加载装扮数据
-            if (OutfitManager.Instance != null)
-            {
-                allOutfitParts = OutfitManager.Instance.GetAllParts();
-                Debug.Log($"[BackpackPanel] 从 OutfitManager 获取到 {allOutfitParts?.Count ?? 0} 个装扮部件");
-            }
-            else
-            {
-                Debug.LogError("[BackpackPanel] OutfitManager.Instance 为 null！");
-            }
-            
-            // 从HomeManager或数据管理器加载家具数据
-            LoadFurnitureData();
-        }
-        
-        /// <summary>
-        /// 加载家具数据
-        /// </summary>
-        private void LoadFurnitureData()
-        {
-            allFurniture = new List<FurnitureData>();
-            
-            // 从Resources加载所有FurnitureData
-            var furnitureArray = Resources.LoadAll<FurnitureData>("Furniture");
-            foreach (var furniture in furnitureArray)
-            {
-                if (furniture.isUnlocked)
+            PlayCloseAnimation(() => {
+                gameObject.SetActive(false);
+                // 通知背包按钮
+                if (backpackButton != null)
                 {
-                    allFurniture.Add(furniture);
+                    backpackButton.OnPanelClosed();
                 }
-            }
+            });
         }
         
         /// <summary>
-        /// 刷新特定家具的显示（摆放后调用）
-        /// </summary>
-        public void RefreshFurnitureItem(FurnitureData furniture)
-        {
-            foreach (var item in furnitureItems)
-            {
-                if (item.furnitureData == furniture)
-                {
-                    item.UpdateCountDisplay();
-                    break;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 刷新装扮列表
-        /// </summary>
-        private void RefreshOutfitList()
-        {
-            // 清除旧项
-            foreach (var item in outfitItems)
-            {
-                Destroy(item.gameObject);
-            }
-            outfitItems.Clear();
-            
-            // 清除空消息提示（如果存在）
-            if (outfitListContainer != null)
-            {
-                Transform emptyMsg = outfitListContainer.Find("EmptyMessage");
-                if (emptyMsg != null)
-                {
-                    Destroy(emptyMsg.gameObject);
-                }
-            }
-            
-            Debug.Log($"[BackpackPanel] RefreshOutfitList 开始 - outfitItemPrefab={outfitItemPrefab != null}, outfitListContainer={outfitListContainer != null}");
-            
-            if (outfitItemPrefab == null || outfitListContainer == null)
-            {
-                Debug.LogError("[BackpackPanel] outfitItemPrefab 或 outfitListContainer 未设置！请在BackpackPanel预制体上配置这些字段。");
-                return;
-            }
-            
-            // 检查是否有数据
-            if (allOutfitParts == null || allOutfitParts.Count == 0)
-            {
-                Debug.LogWarning("[BackpackPanel] 没有装扮部件数据！请检查：\n1. Resources/OutfitParts 文件夹是否存在部件文件\n2. OutfitManager 是否正确加载");
-                ShowEmptyOutfitMessage();
-                return;
-            }
-            
-            Debug.Log($"[BackpackPanel] 找到 {allOutfitParts.Count} 个部件数据");
-            
-            // 创建新项
-            int nullCount = 0;
-            int validCount = 0;
-            
-            foreach (var partData in allOutfitParts)
-            {
-                if (partData == null)
-                {
-                    nullCount++;
-                    continue;
-                }
-                
-                validCount++;
-                Debug.Log($"[BackpackPanel] 创建部件UI: {partData.partName}");
-                
-                try
-                {
-                    var item = Instantiate(outfitItemPrefab, outfitListContainer);
-                    if (item == null)
-                    {
-                        Debug.LogError("[BackpackPanel] Instantiate 返回 null");
-                        continue;
-                    }
-                    
-                    // 确保 GameObject 是激活的
-                    item.gameObject.SetActive(true);
-                    
-                    // 设置明显的背景颜色用于调试
-                    var image = item.GetComponent<UnityEngine.UI.Image>();
-                    if (image != null)
-                    {
-                        image.color = new Color(0.3f, 0.5f, 0.8f, 1f); // 蓝色背景，调试用
-                    }
-                    
-                    bool isUnlocked = OutfitManager.Instance != null && OutfitManager.Instance.IsPartUnlocked(partData);
-                    bool isEquipped = OutfitManager.Instance != null && OutfitManager.Instance.GetEquippedPart(partData.category) == partData;
-                    item.Setup(partData, isUnlocked, isEquipped, OnOutfitItemClick);
-                    outfitItems.Add(item);
-                    
-                    Debug.Log($"[BackpackPanel] 部件UI创建成功: {item.name}, 位置: {item.transform.localPosition}");
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError($"[BackpackPanel] 创建部件UI时出错: {e.Message}\n{e.StackTrace}");
-                }
-            }
-            
-            Debug.Log($"[BackpackPanel] 完成: 成功创建 {outfitItems.Count} 个UI项, 跳过 {nullCount} 个null");
-            
-            Debug.Log($"[BackpackPanel] 刷新了 {outfitItems.Count} 个装扮部件");
-        }
-        
-        /// <summary>
-        /// 显示空状态提示
-        /// </summary>
-        private void ShowEmptyOutfitMessage()
-        {
-            // 创建提示文本
-            GameObject msgObj = new GameObject("EmptyMessage", typeof(RectTransform), typeof(UnityEngine.UI.Text));
-            msgObj.transform.SetParent(outfitListContainer, false);
-            
-            var rect = msgObj.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(400, 100);
-            
-            var text = msgObj.GetComponent<UnityEngine.UI.Text>();
-            text.text = "还没有装扮部件~\n\n请使用菜单：\n绒毛几何物语 → 快速创建 → 装扮部件";
-            text.fontSize = 18;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = new Color(0.7f, 0.7f, 0.7f);
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        }
-        
-        /// <summary>
-        /// 刷新家具列表
-        /// </summary>
-        private void RefreshFurnitureList()
-        {
-            // 清除旧项
-            foreach (var item in furnitureItems)
-            {
-                Destroy(item.gameObject);
-            }
-            furnitureItems.Clear();
-            
-            if (furnitureItemPrefab == null || furnitureListContainer == null) return;
-            
-            // 创建新项
-            foreach (var furniture in allFurniture)
-            {
-                var item = Instantiate(furnitureItemPrefab, furnitureListContainer);
-                item.Setup(furniture, OnFurnitureItemClick, OnDecorateButtonClick);
-                furnitureItems.Add(item);
-            }
-        }
-        
-        /// <summary>
-        /// 装扮项点击
-        /// </summary>
-        private void OnOutfitItemClick(OutfitPartData partData)
-        {
-            // 切换装扮
-            if (OutfitManager.Instance != null)
-            {
-                // 检查是否已装备
-                var currentlyEquipped = OutfitManager.Instance.GetEquippedPart(partData.category);
-                if (currentlyEquipped == partData)
-                {
-                    // 已装备，卸下
-                    OutfitManager.Instance.UnequipPart(partData.category);
-                }
-                else
-                {
-                    // 未装备，装备
-                    OutfitManager.Instance.EquipPart(partData);
-                }
-                
-                // 刷新列表显示
-                RefreshOutfitList();
-            }
-        }
-        
-        /// <summary>
-        /// 家具项点击 - 单选逻辑
-        /// </summary>
-        private void OnFurnitureItemClick(FurnitureData furniture)
-        {
-            // 单选：先取消所有其他项的选中状态
-            foreach (var item in furnitureItems)
-            {
-                if (item.furnitureData != furniture)
-                {
-                    item.SetSelected(false);
-                }
-            }
-            
-            // 找到当前点击的项并设置为选中
-            foreach (var item in furnitureItems)
-            {
-                if (item.furnitureData == furniture)
-                {
-                    item.SetSelected(true);
-                    break;
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 装饰按钮点击 - 进入家具编辑模式
-        /// </summary>
-        private void OnDecorateButtonClick(FurnitureData furniture)
-        {
-            // 保存当前滚动位置
-            if (furnitureScrollRect != null)
-            {
-                furnitureScrollPos = furnitureScrollRect.normalizedPosition;
-            }
-            
-            // 关闭背包
-            Hide();
-            
-            // 通知外部进入编辑模式
-            OnDecorateFurniture?.Invoke(furniture);
-            
-            // 通知HomeManager进入编辑模式
-            var homeManager = FindObjectOfType<HomeManager>();
-            if (homeManager != null)
-            {
-                homeManager.EnterFurnitureEditMode(furniture, this);
-            }
-        }
-        
-        /// <summary>
-        /// 重新打开背包（编辑完成后调用）
+        /// 重新打开（用于家具编辑后返回）
         /// </summary>
         public void Reopen()
         {
-            Show(1); // 回到家园装扮Tab
+            // 直接显示，不播放动画
+            gameObject.SetActive(true);
+            // 确保在家园装扮页
+            SwitchTab(false);
         }
+        
+        #endregion
+        
+        #region 页签切换
+        
+        /// <summary>
+        /// 切换页签
+        /// </summary>
+        private void SwitchTab(bool showPlayerEquip)
+        {
+            if (isPlayerEquipActive == showPlayerEquip) return;
+            
+            isPlayerEquipActive = showPlayerEquip;
+            
+            // 更新页签视觉
+            UpdateTabVisual(playerEquipTab, showPlayerEquip);
+            UpdateTabVisual(homeOutfitTab, !showPlayerEquip);
+            
+            // 切换页面显示
+            if (playerEquipPage != null)
+                playerEquipPage.SetActive(showPlayerEquip);
+            
+            if (homeOutfitPage != null)
+            {
+                homeOutfitPage.SetActive(!showPlayerEquip);
+                
+                // 如果切换到家园装扮页，确保OutfitPanel已创建
+                if (!showPlayerEquip && currentOutfitPanel == null && outfitPanelPrefab != null)
+                {
+                    CreateOutfitPanel();
+                }
+            }
+            
+            // 播放切换动效
+            PlayTabSwitchAnimation();
+        }
+        
+        private void UpdateTabVisual(Button tabButton, bool isSelected)
+        {
+            if (tabButton == null) return;
+            
+            Image image = tabButton.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = isSelected ? selectedTabColor : unselectedTabColor;
+            }
+            
+            // 缩放效果
+            #if DG_TWEENING
+            tabButton.transform.DOScale(isSelected ? 1.1f : 1f, 0.2f)
+                .SetEase(DG.Tweening.Ease.OutQuad);
+            #else
+            tabButton.transform.localScale = isSelected ? Vector3.one * 1.1f : Vector3.one;
+            #endif
+        }
+        
+        private void CreateOutfitPanel()
+        {
+            if (outfitPanelPrefab == null || homeOutfitPage == null) return;
+            
+            currentOutfitPanel = Instantiate(outfitPanelPrefab, homeOutfitPage.transform);
+            
+            // 配置RectTransform填满父物体
+            RectTransform rect = currentOutfitPanel.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            
+            currentOutfitPanel.SetActive(true);
+        }
+        
+        #endregion
+        
+        #region 动画
+        
+        private void PlayOpenAnimation()
+        {
+            if (contentPanel == null || overlay == null) return;
+            
+            #if DG_TWEENING
+            // DOTween动画
+            contentPanel.anchoredPosition = new Vector2(0, -Screen.height);
+            overlay.alpha = 0f;
+            
+            overlay.DOFade(0.6f, 0.3f).SetEase(DG.Tweening.Ease.OutQuad);
+            contentPanel.DOAnchorPosY(0, 0.5f)
+                .SetEase(DG.Tweening.Ease.OutBack)
+                .OnComplete(() => {
+                    // 页签依次弹出
+                    PlayTabsEntryAnimation();
+                });
+            #else
+            // 原生动画
+            StartCoroutine(OpenAnimationNative());
+            #endif
+        }
+        
+        private System.Collections.IEnumerator OpenAnimationNative()
+        {
+            contentPanel.anchoredPosition = new Vector2(0, -Screen.height);
+            overlay.alpha = 0f;
+            
+            float timer = 0;
+            float duration = 0.5f;
+            
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+                float t = timer / duration;
+                
+                // 弹性缓出
+                float elastic = Mathf.Sin(t * Mathf.PI * (0.2f + 2.5f * t * t * t)) * Mathf.Pow(1f - t, 2.2f) + t;
+                
+                contentPanel.anchoredPosition = new Vector2(0, Mathf.Lerp(-Screen.height, 0, elastic));
+                overlay.alpha = Mathf.Lerp(0, 0.6f, t);
+                
+                yield return null;
+            }
+            
+            contentPanel.anchoredPosition = Vector2.zero;
+            overlay.alpha = 0.6f;
+            
+            PlayTabsEntryAnimation();
+        }
+        
+        private void PlayTabsEntryAnimation()
+        {
+            Button[] tabs = new Button[] { playerEquipTab, homeOutfitTab };
+            
+            for (int i = 0; i < tabs.Length; i++)
+            {
+                if (tabs[i] == null) continue;
+                
+                #if DG_TWEENING
+                tabs[i].transform.localScale = Vector3.zero;
+                tabs[i].transform.DOScale(1f, 0.3f)
+                    .SetEase(DG.Tweening.Ease.OutBack)
+                    .SetDelay(i * 0.1f);
+                #else
+                StartCoroutine(TabEntryNative(tabs[i].transform, i * 0.1f));
+                #endif
+            }
+        }
+        
+        private System.Collections.IEnumerator TabEntryNative(Transform tab, float delay)
+        {
+            tab.localScale = Vector3.zero;
+            yield return new WaitForSeconds(delay);
+            
+            float timer = 0;
+            float duration = 0.3f;
+            
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+                float t = timer / duration;
+                float scale = Mathf.Sin(t * Mathf.PI * 0.5f) * 1.1f;
+                if (scale > 1) scale = 1;
+                tab.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            
+            tab.localScale = Vector3.one;
+        }
+        
+        private void PlayTabSwitchAnimation()
+        {
+            // 页面切换动效
+            GameObject activePage = isPlayerEquipActive ? playerEquipPage : homeOutfitPage;
+            if (activePage != null)
+            {
+                activePage.transform.localScale = Vector3.one * 0.95f;
+                
+                #if DG_TWEENING
+                activePage.transform.DOScale(1f, 0.3f)
+                    .SetEase(DG.Tweening.Ease.OutBack);
+                #else
+                StartCoroutine(PageSwitchNative(activePage.transform));
+                #endif
+            }
+        }
+        
+        private System.Collections.IEnumerator PageSwitchNative(Transform page)
+        {
+            float timer = 0;
+            float duration = 0.3f;
+            Vector3 startScale = Vector3.one * 0.95f;
+            
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+                float t = timer / duration;
+                float scale = Mathf.Lerp(0.95f, 1f, Mathf.Sin(t * Mathf.PI * 0.5f));
+                page.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            
+            page.localScale = Vector3.one;
+        }
+        
+        private void PlayCloseAnimation(System.Action onComplete)
+        {
+            if (contentPanel == null || overlay == null)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+            
+            #if DG_TWEENING
+            contentPanel.DOAnchorPosY(-Screen.height, 0.3f)
+                .SetEase(DG.Tweening.Ease.InQuad);
+            
+            overlay.DOFade(0f, 0.3f)
+                .SetEase(DG.Tweening.Ease.InQuad)
+                .OnComplete(() => onComplete?.Invoke());
+            #else
+            StartCoroutine(CloseAnimationNative(onComplete));
+            #endif
+        }
+        
+        private System.Collections.IEnumerator CloseAnimationNative(System.Action onComplete)
+        {
+            float timer = 0;
+            float duration = 0.3f;
+            Vector2 startPos = contentPanel.anchoredPosition;
+            float startAlpha = overlay.alpha;
+            
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+                float t = timer / duration;
+                
+                contentPanel.anchoredPosition = Vector2.Lerp(startPos, new Vector2(0, -Screen.height), t * t);
+                overlay.alpha = Mathf.Lerp(startAlpha, 0, t);
+                
+                yield return null;
+            }
+            
+            onComplete?.Invoke();
+        }
+        
+        #endregion
     }
 }

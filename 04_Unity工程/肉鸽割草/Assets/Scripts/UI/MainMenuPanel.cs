@@ -15,9 +15,11 @@ namespace GeometryWarrior
         
         [Tooltip("最高分显示文本")]
         [SerializeField] private TextMeshProUGUI highScoreText;
+        [SerializeField] private Text highScoreTextLegacy; // 普通Text备选
         
         [Tooltip("能量币显示文本")]
         [SerializeField] private TextMeshProUGUI energyCoinsText;
+        [SerializeField] private Text energyCoinsTextLegacy; // 普通Text备选
         
         [Header("【按钮】")]
         [Tooltip("开始游戏按钮")]
@@ -65,16 +67,18 @@ namespace GeometryWarrior
         {
             // Save disabled temporarily
             // int highScore = PlayerPrefs.GetInt("HighScore", 0);
+            string highScoreStr = "最高分: 0";
             if (highScoreText != null)
-            {
-                highScoreText.text = "最高分: 0";
-            }
+                highScoreText.text = highScoreStr;
+            if (highScoreTextLegacy != null)
+                highScoreTextLegacy.text = highScoreStr;
             
             // int energyCoins = PlayerPrefs.GetInt("EnergyCoins", 0);
+            string energyStr = "能量币: 0";
             if (energyCoinsText != null)
-            {
-                energyCoinsText.text = "能量币: 0";
-            }
+                energyCoinsText.text = energyStr;
+            if (energyCoinsTextLegacy != null)
+                energyCoinsTextLegacy.text = energyStr;
         }
         
         private void OnStartGameClicked()

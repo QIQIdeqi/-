@@ -17,21 +17,28 @@ namespace GeometryWarrior
         
         [Header("[标题]")]
         [SerializeField] private TextMeshProUGUI titleText;      // 标题（游戏结束/游戏暂停）
+        [SerializeField] private Text titleTextLegacy;           // 普通Text备选
         
         [Header("[显示文本]")]
         [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private Text scoreTextLegacy;           // 普通Text备选
         [SerializeField] private TextMeshProUGUI timeText;
+        [SerializeField] private Text timeTextLegacy;            // 普通Text备选
         [SerializeField] private TextMeshProUGUI energyCoinsText;
+        [SerializeField] private Text energyCoinsTextLegacy;     // 普通Text备选
         [SerializeField] private TextMeshProUGUI highScoreText;
+        [SerializeField] private Text highScoreTextLegacy;       // 普通Text备选
         
         [Header("[按钮]")]
         [SerializeField] private Button reviveButton;            // 复活/继续按钮
         [SerializeField] private TextMeshProUGUI reviveButtonText; // 按钮文字
+        [SerializeField] private Text reviveButtonTextLegacy;    // 普通Text备选
         [SerializeField] private Button restartButton;           // 重新开始按钮
         [SerializeField] private Button menuButton;              // 返回菜单按钮
         
         [Header("[提示文本]")]
         [SerializeField] private TextMeshProUGUI reviveHintText; // 复活提示（看广告等）
+        [SerializeField] private Text reviveHintTextLegacy;      // 普通Text备选
         
         private GameManager gameManager;
         private PanelMode currentMode = PanelMode.GameOver;
@@ -68,37 +75,34 @@ namespace GeometryWarrior
         private void SetupForMode(PanelMode mode)
         {
             // 设置标题
-            if (titleText != null)
-            {
-                titleText.text = mode == PanelMode.GameOver ? "游戏结束" : "游戏暂停";
-            }
+            string titleStr = mode == PanelMode.GameOver ? "游戏结束" : "游戏暂停";
+            if (titleText != null) titleText.text = titleStr;
+            if (titleTextLegacy != null) titleTextLegacy.text = titleStr;
             
             // 设置复活/继续按钮文字
-            if (reviveButtonText != null)
-            {
-                reviveButtonText.text = mode == PanelMode.GameOver ? "复活（看广告）" : "继续游戏";
-            }
+            string buttonStr = mode == PanelMode.GameOver ? "复活（看广告）" : "继续游戏";
+            if (reviveButtonText != null) reviveButtonText.text = buttonStr;
+            if (reviveButtonTextLegacy != null) reviveButtonTextLegacy.text = buttonStr;
             
             // 设置提示文字
-            if (reviveHintText != null)
+            if (mode == PanelMode.GameOver)
             {
-                if (mode == PanelMode.GameOver)
+                string hintStr = "观看广告即可复活继续游戏";
+                if (reviveHintText != null)
                 {
-                    reviveHintText.text = "观看广告即可复活继续游戏";
+                    reviveHintText.text = hintStr;
                     reviveHintText.gameObject.SetActive(true);
                 }
-                else
+                if (reviveHintTextLegacy != null)
                 {
-                    reviveHintText.gameObject.SetActive(false); // 暂停时不显示复活提示
+                    reviveHintTextLegacy.text = hintStr;
+                    reviveHintTextLegacy.gameObject.SetActive(true);
                 }
             }
-            
-            // 暂停时隐藏重新开始按钮（可选，也可以保留）
-            if (restartButton != null)
+            else
             {
-                // 暂停时也可以重新开始，所以这里不做处理
-                // 如果你想暂停时隐藏重新开始，取消下面注释：
-                // restartButton.gameObject.SetActive(mode == PanelMode.GameOver);
+                if (reviveHintText != null) reviveHintText.gameObject.SetActive(false);
+                if (reviveHintTextLegacy != null) reviveHintTextLegacy.gameObject.SetActive(false);
             }
         }
         
@@ -109,29 +113,25 @@ namespace GeometryWarrior
         {
             if (gameManager == null) return;
             
-            if (scoreText != null)
-            {
-                scoreText.text = $"得分: {gameManager.Score}";
-            }
+            string scoreStr = $"得分: {gameManager.Score}";
+            if (scoreText != null) scoreText.text = scoreStr;
+            if (scoreTextLegacy != null) scoreTextLegacy.text = scoreStr;
             
-            if (timeText != null)
-            {
-                float time = gameManager.GameTime;
-                int minutes = Mathf.FloorToInt(time / 60f);
-                int seconds = Mathf.FloorToInt(time % 60f);
-                timeText.text = $"存活时间: {minutes:00}:{seconds:00}";
-            }
+            float time = gameManager.GameTime;
+            int minutes = Mathf.FloorToInt(time / 60f);
+            int seconds = Mathf.FloorToInt(time % 60f);
+            string timeStr = $"存活时间: {minutes:00}:{seconds:00}";
+            if (timeText != null) timeText.text = timeStr;
+            if (timeTextLegacy != null) timeTextLegacy.text = timeStr;
             
-            if (energyCoinsText != null)
-            {
-                int earnedCoins = Mathf.RoundToInt(gameManager.Score / 100f);
-                energyCoinsText.text = $"获得能量币: +{earnedCoins}";
-            }
+            int earnedCoins = Mathf.RoundToInt(gameManager.Score / 100f);
+            string coinsStr = $"获得能量币: +{earnedCoins}";
+            if (energyCoinsText != null) energyCoinsText.text = coinsStr;
+            if (energyCoinsTextLegacy != null) energyCoinsTextLegacy.text = coinsStr;
             
-            if (highScoreText != null)
-            {
-                highScoreText.text = $"本局得分: {gameManager.Score}";
-            }
+            string highScoreStr = $"本局得分: {gameManager.Score}";
+            if (highScoreText != null) highScoreText.text = highScoreStr;
+            if (highScoreTextLegacy != null) highScoreTextLegacy.text = highScoreStr;
         }
         
         /// <summary>
