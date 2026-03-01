@@ -39,6 +39,12 @@
       "dependencies": {},
       "hash": "4443e5a9bcf800118f7c3e10a7750e804ed3121b"
     },
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
       "depth": 1,
